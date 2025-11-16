@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pawpal/views/splashpage.dart';
+import 'package:pawpal/views/registerpage.dart';
 
 void main() {
   runApp(const MainApp());
@@ -16,11 +16,11 @@ class MainApp extends StatelessWidget {
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.cyan),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Colors.cyan,
-          foregroundColor: Colors.white,
+          backgroundColor: Color.fromARGB(255, 72, 38, 44),
+          foregroundColor: Color.fromARGB(255, 255, 244, 215),
         )
       ),
-      home: SplashPage()
+      home: RegisterScreen(),
     );
   }
 }
