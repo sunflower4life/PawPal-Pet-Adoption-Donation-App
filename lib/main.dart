@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pawpal/views/registerpage.dart';
+import 'package:pawpal/views/registerscreen.dart';
 
 void main() {
   runApp(const MainApp());

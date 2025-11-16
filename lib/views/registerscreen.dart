@@ -1,5 +1,9 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:pawpal/views/loginscreen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -124,15 +128,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   TextButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      /*Navigator.push(
-                        context
-                        /*MaterialPageRoute(
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
                           builder: (context) => const LoginPage(),
-                        ),*/
-                      );*/
+                        ),
+                      );
                     }, 
                     child: Text('Already have an account? Login')
                   ),
+
                   SizedBox(height:5),
                 ],
               ),
@@ -177,7 +182,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
     }
-    // Validation 3: Check password length (minimum 6 characters) - THIS WAS MISSING!
+    // Validation 4: Check password length (minimum 6 characters) - THIS WAS MISSING!
     if (password.length < 6) {
       SnackBar snackBar = const SnackBar(
         content: Text('Password must be at least 6 characters long'),
@@ -206,22 +211,94 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Text('Cancel'),
           ),
         ],
-        content: Text ('Are you sure you want to register this account'),
+        content: Text ('Are you sure you want to register this account?'),
       ),
     );
   }
 
   void registerUser(String name, String email, String password, String phone) async {
+    setState(() {
+      isLoading = true;
+    });
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          content: Row(
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(width: 20),
+              Text('Registering...'),
+            ],
+          ),
+        );
+      },
+      barrierDismissible: false,
+    );
     await http.post(
-      Uri.parse('http:// /pawpal/api/register_user.php'),
+      Uri.parse('http://192.168.1.6/pawpal/api/register_user.php'),
       body:{
         'name': name,
         'email': email,
         'password': password,
         'phone': phone},
+    )
+    .then((response) {
+          // log(response.body);
+          // log(response.statusCode.toString());
+          if (response.statusCode == 200) {
+            var jsonResponse = response.body;
+            var resarray = jsonDecode(jsonResponse);
+            log(jsonResponse);
+            if (resarray['success'] == true) {
+              if (!mounted) return;
 
-    ).then((response) {
-      print(response.body);
-    });
+              // Close only the loading dialog
+              Navigator.pop(context);
+
+              setState(() {
+                isLoading = false;
+              });
+
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Registration successful')),
+              );
+
+              // Navigate to login page
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => const LoginPage()),
+              );
+            }else {
+              if (!mounted) return;
+              SnackBar snackBar = SnackBar(content: Text(resarray['message']));
+              ScaffoldMessenger.of(context).showSnackBar(snackBar);
+            }
+          } else {
+            if (!mounted) return;
+            SnackBar snackBar = const SnackBar(
+              content: Text('Registration failed. Please try again.'),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          }
+        })
+        .timeout(
+          Duration(seconds: 10),
+          onTimeout: () {
+            if (!mounted) return;
+            SnackBar snackBar = const SnackBar(
+              content: Text('Request timed out. Please try again.'),
+            );
+            ScaffoldMessenger.of(context).showSnackBar(snackBar);
+          },
+        );
+
+    if (isLoading) {
+      if (!mounted) return;
+      Navigator.pop(context); // Close the loading dialog
+      setState(() {
+        isLoading = false;
+      });
+    } 
   }
 }  
