@@ -1,6 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;  // ✅ FIXED: was pawpal/user.dart
+import 'package:pawpal/user.dart';
+import 'package:pawpal/views/homescreen.dart';
 import 'package:pawpal/views/registerscreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -12,35 +15,38 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  TextEditingController emailController = TextEditingController();  
+  TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  
+
   late double height, width;
   bool visible = true;
   bool isChecked = false;
 
-  //late User user;
+  late User user;
 
   @override
   void initState() {
     super.initState();
     loadPreferences();
   }
-  
+
+  @override
   Widget build(BuildContext context) {
     height = MediaQuery.of(context).size.height;
     width = MediaQuery.of(context).size.width;
     print(width);
-    if(width > 400) {
+    if (width > 400) {
       width = 400;
-    } else{
+    } else {
       width = width;
     }
     return Scaffold(
-      appBar: AppBar(title: Text('Login Page'),),
+      appBar: AppBar(
+        title: Text('Login Page'),
+      ),
       body: Center(
         child: SingleChildScrollView(
-          child:Padding(
+          child: Padding(
             padding: const EdgeInsets.fromLTRB(24, 8, 24, 8),
             child: SizedBox(
               width: width,
@@ -48,9 +54,9 @@ class _LoginPageState extends State<LoginPage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(16.0),
-                    child: Image.asset('assets/images/pawpal.png' , scale: 4.5),
+                    child: Image.asset('assets/images/pawpal.png', scale: 4.5),
                   ),
-                  SizedBox(height:5),
+                  SizedBox(height: 5),
                   TextField(
                     controller: emailController,
                     keyboardType: TextInputType.emailAddress,
@@ -59,17 +65,17 @@ class _LoginPageState extends State<LoginPage> {
                       border: OutlineInputBorder(),
                     ),
                   ),
-                  SizedBox(height: 10,),
+                  SizedBox(height: 10),
                   TextField(
                     controller: passwordController,
                     obscureText: visible,
                     decoration: InputDecoration(
                       labelText: 'Password',
                       suffixIcon: IconButton(
-                        onPressed: (){
-                          if(visible){
+                        onPressed: () {
+                          if (visible) {
                             visible = false;
-                          }else{
+                          } else {
                             visible = true;
                           }
                           setState(() {});
@@ -79,7 +85,6 @@ class _LoginPageState extends State<LoginPage> {
                       border: OutlineInputBorder(),
                     ),
                   ),
-
                   Padding(
                     padding: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                     child: Row(
@@ -117,7 +122,6 @@ class _LoginPageState extends State<LoginPage> {
                               if (emailController.text.isEmpty &&
                                   passwordController.text.isEmpty) {
                                 return;
-                                // do nothing
                               }
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -138,6 +142,7 @@ class _LoginPageState extends State<LoginPage> {
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
+                        loginuser();
                       },
                       child: Text('Login'),
                     ),
@@ -145,7 +150,6 @@ class _LoginPageState extends State<LoginPage> {
                   SizedBox(height: 5),
                   GestureDetector(
                     onTap: () {
-                      Navigator.pop(context);
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -153,9 +157,9 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       );
                     },
-                    child: Text('Dont have an account? Register here.'),
+                    child: Text('Don\'t have an account? Register here.'),
                   ),
-                  SizedBox(height:5),
+                  SizedBox(height: 5),
                   Text('Forget password'),
                 ],
               ),
@@ -167,7 +171,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void prefUpdate(bool isChecked) async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     if (isChecked) {
       prefs.setString('email', emailController.text);
       prefs.setString('password', passwordController.text);
@@ -192,5 +196,72 @@ class _LoginPageState extends State<LoginPage> {
       }
     });
   }
-}
 
+  void loginuser() {
+    String email = emailController.text.trim();
+    String password = passwordController.text.trim();
+
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Please fill in email and password"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    http
+        .post(
+          Uri.parse('http://192.168.1.6/pawpal/api/login_user.php'),
+          body: {
+            'email': email,
+            'password': password,
+          },
+        )
+        .then((response) {
+          if (response.statusCode == 200) {
+            var jsonResponse = response.body;
+            print(jsonResponse);
+            var resarray = jsonDecode(jsonResponse);
+            
+            if (resarray['status'] == 'success') {
+              user = User.fromJson(resarray['data'][0]);
+
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text("Login successful"),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              
+              // ✅ FIXED: Removed unnecessary Navigator.pop(context)
+              // Navigate to home page or dashboard
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => HomeScreen(user: user),
+                ),
+              );
+            } else {
+              if (!mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(resarray['message']),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            }
+          } else {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text("Login failed: ${response.statusCode}"),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        });
+  }
+}

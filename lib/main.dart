@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:pawpal/views/registerscreen.dart';
+import 'package:pawpal/views/splashscreen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -20,7 +20,7 @@ class MainApp extends StatelessWidget {
           foregroundColor: Color.fromARGB(255, 255, 244, 215),
         )
       ),
-      home: RegisterScreen(),
+      home: Splashscreen(),
     );
   }
 }
