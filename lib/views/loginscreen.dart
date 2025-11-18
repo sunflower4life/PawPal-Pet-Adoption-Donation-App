@@ -144,7 +144,26 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () {
                         loginuser();
                       },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:Color.fromARGB(255, 72, 38, 44),
+                          foregroundColor:Color.fromARGB(255, 255, 244, 215),
+                        ),
                       child: Text('Login'),
+                    ),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        emailController.clear();
+                        passwordController.clear();
+                        setState(() {});
+                      },
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:Color.fromARGB(255, 72, 38, 44),
+                          foregroundColor:Color.fromARGB(255, 255, 244, 215),
+                        ),
+                      child: Text('Reset'),
                     ),
                   ),
                   SizedBox(height: 5),
@@ -225,18 +244,17 @@ class _LoginPageState extends State<LoginPage> {
             print(jsonResponse);
             var resarray = jsonDecode(jsonResponse);
             
-            if (resarray['status'] == 'success') {
+            if (resarray['success'] == 'success') {
               user = User.fromJson(resarray['data'][0]);
 
               if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
-                  content: Text("Login successful"),
+                  content: Text("Login successful.  Welcome ${user.name}!"),
                   backgroundColor: Colors.green,
                 ),
               );
               
-              // ✅ FIXED: Removed unnecessary Navigator.pop(context)
               // Navigate to home page or dashboard
               Navigator.pushReplacement(
                 context,

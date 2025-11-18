@@ -121,6 +121,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         print('Register button pressed');
                         registerDialog();
                       }, 
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor:Color.fromARGB(255, 72, 38, 44),
+                          foregroundColor:Color.fromARGB(255, 255, 244, 215),
+                        ),
                       child: Text('Register'),
                     ),
                   ),

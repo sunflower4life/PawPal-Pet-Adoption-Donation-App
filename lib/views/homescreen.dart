@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:pawpal/user.dart';
+import 'package:pawpal/views/loginscreen.dart';
 
 class HomeScreen extends StatefulWidget {
-  final User user;  // Remove the ? - user is required!
+  final User user;
 
   const HomeScreen({super.key, required this.user});
 
@@ -16,9 +17,18 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("PawPal Home"),
-        backgroundColor: Colors.orange[700],
         automaticallyImplyLeading: false, // Removes back button
+        actions: [
+          IconButton(// navigates back to login page
+            onPressed: (){
+              Navigator.push(context, 
+              MaterialPageRoute(builder: (context) => const LoginPage()));
+            },
+            icon: const Icon(Icons.logout),
+          ),
+        ],
       ),
+      
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -31,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: Colors.orange[700],
               ),
               SizedBox(height: 20),
+              // Assignment requirement: "Welcome, Ali!" format
               Text(
                 "Welcome, ${widget.user.name}!",
                 style: TextStyle(
@@ -48,52 +59,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   color: Colors.grey[600],
                 ),
                 textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 30),
-              Card(
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'User Information',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      Divider(),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(Icons.email, color: Colors.orange[700]),
-                          SizedBox(width: 10),
-                          Expanded(
-                            child: Text('Email: ${widget.user.email}'),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(Icons.phone, color: Colors.orange[700]),
-                          SizedBox(width: 10),
-                          Text('Phone: ${widget.user.phone}'),
-                        ],
-                      ),
-                      SizedBox(height: 10),
-                      Row(
-                        children: [
-                          Icon(Icons.calendar_today, color: Colors.orange[700]),
-                          SizedBox(width: 10),
-                          Text('Registered: ${widget.user.regDate}'),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
               ),
             ],
           ),
