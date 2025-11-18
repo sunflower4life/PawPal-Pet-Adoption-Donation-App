@@ -38,16 +38,15 @@ class _HomeScreenState extends State<HomeScreen> {
               Icon(
                 Icons.pets,
                 size: 100,
-                color: Colors.orange[700],
+                color: Colors.orange,
               ),
               SizedBox(height: 20),
-              // Assignment requirement: "Welcome, Ali!" format
               Text(
                 "Welcome, ${widget.user.name}!",
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
-                  color: Colors.orange[700],
+                  color: Colors.orange,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -56,7 +55,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 'to PawPal Pet Adoption & Donation',
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[600],
+                  color: Colors.grey,
                 ),
                 textAlign: TextAlign.center,
               ),

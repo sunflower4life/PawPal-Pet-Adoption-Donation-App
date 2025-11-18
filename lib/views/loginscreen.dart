@@ -131,6 +131,7 @@ class _LoginPageState extends State<LoginPage> {
                               );
                               emailController.clear();
                               passwordController.clear();
+                              
                               setState(() {});
                             }
                           },
@@ -157,6 +158,11 @@ class _LoginPageState extends State<LoginPage> {
                       onPressed: () {
                         emailController.clear();
                         passwordController.clear();
+                        // Uncheck Remember Me
+                        isChecked = false;
+
+                        // Remove stored preferences
+                        prefUpdate(false);
                         setState(() {});
                       },
                       style: ElevatedButton.styleFrom(

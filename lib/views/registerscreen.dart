@@ -129,20 +129,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   SizedBox(height: 5),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
+                  GestureDetector(
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const LoginPage(),
                         ),
                       );
-                    }, 
-                    child: Text('Already have an account? Login')
+                    },
+                    child: Text('Already have an account? Login here.'),
                   ),
-
-                  SizedBox(height:5),
+                  SizedBox(height: 5),
                 ],
               ),
             ),
