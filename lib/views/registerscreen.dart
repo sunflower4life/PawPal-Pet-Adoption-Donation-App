@@ -246,8 +246,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         'phone': phone},
     )
     .then((response) {
-          // log(response.body);
-          // log(response.statusCode.toString());
           if (response.statusCode == 200) {
             var jsonResponse = response.body;
             var resarray = jsonDecode(jsonResponse);
@@ -256,17 +254,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
               if (!mounted) return;
               // Close only the loading dialog
               Navigator.pop(context);
-
               setState(() {
                 isLoading = false;
               });
-
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text('Registration successful'),
                 backgroundColor: Colors.green,
                 ),
               );
-
               // Navigate to login page
               Navigator.pushReplacement(
                 context,
