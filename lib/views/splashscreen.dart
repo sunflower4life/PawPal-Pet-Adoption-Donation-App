@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pawpal/views/loginscreen.dart';
+import 'package:pawpal/views/registerscreen.dart';
 
 class Splashscreen extends StatefulWidget {
   const Splashscreen({super.key});
@@ -13,11 +14,11 @@ class _SplashscreenState extends State<Splashscreen> {
   @override
   void initState() {
     super.initState();
-    // After 2 seconds, navigate to LoginPage
-    Future.delayed(const Duration(seconds: 2), () {
+    // After 3 seconds, navigate to LoginPage
+    Future.delayed(const Duration(seconds: 7), () {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => const LoginPage()),
+        MaterialPageRoute(builder: (context) => const RegisterScreen()),
       );
     });
   }
@@ -32,7 +33,7 @@ class _SplashscreenState extends State<Splashscreen> {
             Image.asset('assets/images/pawpal.png', scale: 3),
             SizedBox(height: 20),
             CircularProgressIndicator(
-              color: Colors.orange[700],
+              color: Colors.orange,
             ),
             SizedBox(height: 20),
             Text(
@@ -40,7 +41,7 @@ class _SplashscreenState extends State<Splashscreen> {
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
-                color: Colors.orange[700],
+                color: Colors.orange,
               ),
             ),
           ],

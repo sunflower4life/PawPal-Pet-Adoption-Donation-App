@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:pawpal/user.dart';
 import 'package:pawpal/views/loginscreen.dart';
+import 'package:pawpal/views/registerscreen.dart';
 
 class HomeScreen extends StatefulWidget {
   final User user;
@@ -19,7 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
         title: const Text("PawPal Home"),
         automaticallyImplyLeading: false, // Removes back button
         actions: [
-          IconButton(// navigates back to login page
+          IconButton(// logout icon then navigates back to login page
             onPressed: (){
               Navigator.push(context, 
               MaterialPageRoute(builder: (context) => const LoginPage()));
@@ -27,6 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
           ),
         ],
+        
       ),
       
       body: Center(
@@ -62,6 +64,13 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const RegisterScreen()));
+        },
+        backgroundColor: Colors.orange,
+        child: const Icon(Icons.add),
       ),
     );
   }

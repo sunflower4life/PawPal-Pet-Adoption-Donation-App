@@ -254,7 +254,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             log(jsonResponse);
             if (resarray['success'] == true) {
               if (!mounted) return;
-
               // Close only the loading dialog
               Navigator.pop(context);
 
@@ -263,7 +262,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               });
 
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Registration successful')),
+                SnackBar(content: Text('Registration successful'),
+                backgroundColor: Colors.green,
+                ),
               );
 
               // Navigate to login page
@@ -280,6 +281,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             if (!mounted) return;
             SnackBar snackBar = const SnackBar(
               content: Text('Registration failed. Please try again.'),
+              backgroundColor: Colors.red,
             );
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
           }
@@ -290,6 +292,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             if (!mounted) return;
             SnackBar snackBar = const SnackBar(
               content: Text('Request timed out. Please try again.'),
+              backgroundColor: Colors.red,
             );
             ScaffoldMessenger.of(context).showSnackBar(snackBar);
           },

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;  // ✅ FIXED: was pawpal/user.dart
@@ -195,7 +196,7 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  void prefUpdate(bool isChecked) async {
+  void prefUpdate(bool isChecked) async { //saves email and password
     SharedPreferences prefs = await SharedPreferences.getInstance();
     if (isChecked) {
       prefs.setString('email', emailController.text);
@@ -208,7 +209,7 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
-  void loadPreferences() {
+  void loadPreferences() { //reads email and password on page load
     SharedPreferences.getInstance().then((prefs) {
       bool? rememberMe = prefs.getBool('rememberMe');
       if (rememberMe != null && rememberMe) {
@@ -222,7 +223,7 @@ class _LoginPageState extends State<LoginPage> {
     });
   }
 
-  void loginuser() {
+  void loginuser() { //takes user input(email,pass)->send to php->tunggu json response -> convert json to user object->navigate to home page
     String email = emailController.text.trim();
     String password = passwordController.text.trim();
 
@@ -239,7 +240,7 @@ class _LoginPageState extends State<LoginPage> {
     http
         .post(
           Uri.parse('http://192.168.1.6/pawpal/api/login_user.php'),
-          body: {
+          body: { //json send
             'email': email,
             'password': password,
           },
@@ -247,11 +248,10 @@ class _LoginPageState extends State<LoginPage> {
         .then((response) {
           if (response.statusCode == 200) {
             var jsonResponse = response.body;
-            print(jsonResponse);
             var resarray = jsonDecode(jsonResponse);
-            
+            log(jsonResponse);
             if (resarray['success'] == 'success') {
-              user = User.fromJson(resarray['data'][0]);
+              user = User.fromJson(resarray['data'][0]);//convert json to user object
 
               if (!mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
