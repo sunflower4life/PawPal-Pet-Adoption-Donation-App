@@ -18,7 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text("PawPal Home"),
-        automaticallyImplyLeading: false, // Removes back button
+        //automaticallyImplyLeading: false, // Removes back button
         actions: [
           IconButton(// logout icon then navigates back to login page
             onPressed: (){
@@ -28,9 +28,7 @@ class _HomeScreenState extends State<HomeScreen> {
             icon: const Icon(Icons.logout),
           ),
         ],
-        
       ),
-      
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
