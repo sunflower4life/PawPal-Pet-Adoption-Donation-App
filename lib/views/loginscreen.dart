@@ -2,7 +2,8 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;  
+import 'package:http/http.dart' as http;
+import 'package:pawpal/myconfig.dart';  
 import 'package:pawpal/user.dart';
 import 'package:pawpal/views/homescreen.dart';
 import 'package:pawpal/views/registerscreen.dart';
@@ -239,7 +240,7 @@ class _LoginPageState extends State<LoginPage> {
 
     http
         .post(
-          Uri.parse('http://10.144.149.128/pawpal/api/login_user.php'),
+          Uri.parse('${MyConfig.baseUrl}pawpal/api/login_user.php'),
           body: { //json send
             'email': email,
             'password': password,
@@ -250,7 +251,7 @@ class _LoginPageState extends State<LoginPage> {
             var jsonResponse = response.body;
             var resarray = jsonDecode(jsonResponse);
             log(jsonResponse);
-            if (resarray['success'] == 'success') {
+            if (resarray['success'] == true) {
               user = User.fromJson(resarray['data'][0]);//convert json to user object
 
               if (!mounted) return;

@@ -19,15 +19,15 @@
             while ($row = $result->fetch_assoc()) {
                 $userdata[] = $row;
             }
-            $response = array('success' => 'success', 'message' => 'Login successful', 'data' => $userdata);
+            $response = array('success' => true, 'message' => 'Login successful', 'data' => $userdata);
             sendJsonResponse($response);
         } else {
-            $response = array('success' => 'failed', 'message' => 'Invalid email or password','data'=>null);
+            $response = array('success' => false, 'message' => 'Invalid email or password','data'=>null);
             sendJsonResponse($response);
         }
 
     }else{
-        $response = array('success' => 'failed', 'message' => 'Method Not Allowed');
+        $response = array('success' => false, 'message' => 'Method Not Allowed');
         sendJsonResponse($response);
         exit();
     }

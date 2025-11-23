@@ -39,7 +39,7 @@
 		}
 
 	}catch(Exception $e){
-		$response = array('success' => 'failed', 'message' => 'ERROR occured: ' .$e->getMessage());
+		$response = array('success' => false, 'message' => 'ERROR occured: ' .$e->getMessage());
 		sendJsonResponse($response);
 	}
 
