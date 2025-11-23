@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:pawpal/views/loginscreen.dart';
 import 'package:pawpal/views/registerscreen.dart';
 
 class Splashscreen extends StatefulWidget {
@@ -15,7 +14,7 @@ class _SplashscreenState extends State<Splashscreen> {
   void initState() {
     super.initState();
     // After 3 seconds, navigate to LoginPage
-    Future.delayed(const Duration(seconds: 7), () {
+    Future.delayed(const Duration(seconds: 3), () {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const RegisterScreen()),

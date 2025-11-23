@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;  // ✅ FIXED: was pawpal/user.dart
+import 'package:http/http.dart' as http;  
 import 'package:pawpal/user.dart';
 import 'package:pawpal/views/homescreen.dart';
 import 'package:pawpal/views/registerscreen.dart';
@@ -239,7 +239,7 @@ class _LoginPageState extends State<LoginPage> {
 
     http
         .post(
-          Uri.parse('http://192.168.1.6/pawpal/api/login_user.php'),
+          Uri.parse('http://10.144.149.128/pawpal/api/login_user.php'),
           body: { //json send
             'email': email,
             'password': password,

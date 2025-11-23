@@ -238,7 +238,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       barrierDismissible: false,
     );
     await http.post(
-      Uri.parse('http://192.168.1.6/pawpal/api/register_user.php'),
+      Uri.parse('http://10.144.149.128/pawpal/api/register_user.php'),
       body:{
         'name': name,
         'email': email,
