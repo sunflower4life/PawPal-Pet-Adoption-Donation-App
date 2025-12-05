@@ -7,7 +7,6 @@ import 'package:pawpal/models/user.dart';
 import 'package:pawpal/myconfig.dart';
 import 'package:pawpal/views/loginscreen.dart';
 import 'package:pawpal/views/submitpetscreen.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   final User? user;
@@ -21,7 +20,6 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   List<PetService> petList = [];//Store pets that come from API
   String status = "Loading...";
-  DateFormat formatter = DateFormat('dd/MM/yyyy hh:mm a');
   late double screenWidth, screenHeight;
   int numofpage = 1;
   int curpage = 1;
@@ -31,6 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    //load pets immediately when page is open
     loadPetServices('');
   }
 
@@ -76,6 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: screenWidth,
           child: Column(
             children: [
+              //no data and still loading/empty
               petList.isEmpty
                   ? Expanded(
                       child: Center(
@@ -93,6 +93,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     )
+                    //have data, display pets list
                   : Expanded(
                       child: ListView.builder(
                         itemCount: petList.length,
@@ -114,7 +115,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  // IMAGE
+                                  // IMAGE , Thumbnail image
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(12),
                                     child: Container(
@@ -257,6 +258,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+      //floating action button to add new pet
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           if (widget.user?.user_id == null || widget.user?.user_id == '0') {
@@ -288,7 +290,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // Function to load pet services
+  // Function to load pet services from API
   void loadPetServices(String searchQuery) {
   petList.clear();
   setState(() {
@@ -345,7 +347,7 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     }
 
-  // Helper function to get first image URL
+  // Helper function to get first image for thumbnail
   String? getFirstImageUrl(PetService pet) {
     if (pet.imagePaths == null || pet.imagePaths!.isEmpty) {
       return null;

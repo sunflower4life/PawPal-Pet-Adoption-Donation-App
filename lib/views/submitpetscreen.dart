@@ -37,9 +37,9 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
   String selectedPet = '';
   String selectedCategory = '';
 
-  late Position myposition;
   String lat = "";
   String lng = "";
+  late Position myposition;
 
   /// MAX 3 IMAGES
   List<File> imageFiles = [];
@@ -58,29 +58,7 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Pet Service'),
-        /*actions: [
-          suffixIcon(
-            icon: Icon(Icons.gps_fixed),
-            /*onPressed: () async {
-              myposition = await _determinePosition();
-              lat = myposition.latitude.toString();
-              lng = myposition.longitude.toString();
-
-              List<Placemark> placemarks = await placemarkFromCoordinates(
-                myposition.latitude,
-                myposition.longitude,
-              );
-
-              Placemark place = placemarks[0];
-              locationController.text =
-                  "${place.name},\n${place.street},\n${place.postalCode},${place.locality},\n${place.administrativeArea},${place.country}";
-
-              setState(() {});
-            },*/
-          ),
-        ],*/
       ),
-
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -248,6 +226,7 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
     );
   }
 
+  //pick image from camera/gallery
   void pickImageDialog() {
   if (imageFiles.length >= 3) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -333,28 +312,7 @@ Future<void> openGallery() async {
     }
   }
 
-  /*Future<void> getLocation() async {
-    try {
-      myposition = await _determinePosition();
-      lat = myposition.latitude.toString();
-      lng = myposition.longitude.toString();
-
-      List<Placemark> placemarkList =
-          await placemarkFromCoordinates(myposition.latitude, myposition.longitude);
-
-      Placemark place = placemarkList.first;
-
-      locationController.text =
-          "${place.street}, ${place.locality}, ${place.administrativeArea}, ${place.country}";
-
-      setState(() {});
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Location Error: $e"), backgroundColor: Colors.red),
-      );
-    }
-  }*/
-
+  // Permission check for GPS
   Future<Position> _determinePosition() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) return Future.error("Location services disabled.");
@@ -481,6 +439,7 @@ Future<void> openGallery() async {
     );
   }
 
+  //send data to API
   void submitPet() {
     
     List<String> encodedImages = [];
