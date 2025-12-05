@@ -4,8 +4,8 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:pawpal/myconfig.dart';  
-import 'package:pawpal/user.dart';
-import 'package:pawpal/views/homescreen.dart';
+import 'package:pawpal/models/user.dart';
+import 'package:pawpal/views/mainpage.dart';
 import 'package:pawpal/views/registerscreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -240,7 +240,7 @@ class _LoginPageState extends State<LoginPage> {
 
     http
         .post(
-          Uri.parse('${MyConfig.baseUrl}pawpal/api/login_user.php'),
+          Uri.parse('${MyConfig.baseUrl}/pawpal/api/login_user.php'),
           body: { //json send
             'email': email,
             'password': password,
