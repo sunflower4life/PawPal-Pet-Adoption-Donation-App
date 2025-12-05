@@ -20,15 +20,22 @@ class Submitpetscreen extends StatefulWidget {
 }
 
 class _SubmitpetscreenState extends State<Submitpetscreen> {
-  List<String> petType = ['Cat', 'Dog', 'Rabbit', 'Others'];
-  List<String> category = ['Adoption', 'Donation Request', 'Help/Rescue'];
+  List<String> petType = [
+    'Cat', 
+    'Dog', 
+    'Rabbit', 
+    'Others'];
+  List<String> category = [
+    'Adoption', 
+    'Donation Request', 
+    'Help/Rescue'];
 
   TextEditingController petnamecontroller = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController locationController = TextEditingController();
 
-  String selectedPet = "Cat";
-  String selectedCategory = "Adoption";
+  String selectedPet = '';
+  String selectedCategory = '';
 
   late Position myposition;
   String lat = "";
@@ -36,13 +43,11 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
 
   /// MAX 3 IMAGES
   List<File> imageFiles = [];
+  late double height, width;
 
-  //for dot indicator at bottom
+  //for dot indicator at bottom of image slider to tell user that they can slide to see the next image
   PageController pageController = PageController();
   int currentIndex = 0;
-
-
-  late double height, width;
 
   @override
   Widget build(BuildContext context) {
@@ -52,35 +57,28 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Submit Pet Service'),
-        actions: [
-          IconButton(
+        title: Text('Pet Service'),
+        /*actions: [
+          suffixIcon(
             icon: Icon(Icons.gps_fixed),
-            onPressed: () async {
-              try {
-                myposition = await _determinePosition();
-                lat = myposition.latitude.toString();
-                lng = myposition.longitude.toString();
+            /*onPressed: () async {
+              myposition = await _determinePosition();
+              lat = myposition.latitude.toString();
+              lng = myposition.longitude.toString();
 
-                List<Placemark> placemarks = await placemarkFromCoordinates(
-                  myposition.latitude,
-                  myposition.longitude,
-                );
+              List<Placemark> placemarks = await placemarkFromCoordinates(
+                myposition.latitude,
+                myposition.longitude,
+              );
 
-                Placemark place = placemarks[0];
-                locationController.text =
-                    "${place.name},\n${place.street},\n${place.postalCode},${place.locality},\n${place.administrativeArea},${place.country}";
+              Placemark place = placemarks[0];
+              locationController.text =
+                  "${place.name},\n${place.street},\n${place.postalCode},${place.locality},\n${place.administrativeArea},${place.country}";
 
-                setState(() {});
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Location Error: $e"), backgroundColor: Colors.red),
-                );
-              }
-            },
+              setState(() {});
+            },*/
           ),
-
-        ],
+        ],*/
       ),
 
       body: Center(
@@ -207,8 +205,23 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
                       labelText: 'Location',
                       border: OutlineInputBorder(),
                       suffixIcon: IconButton(
-                        onPressed: getLocation,
-                        icon: Icon(Icons.location_on),
+                        onPressed: () async {
+                          myposition = await _determinePosition();
+                          lat = myposition.latitude.toString();
+                          lng = myposition.longitude.toString();
+
+                          List<Placemark> placemarks = await placemarkFromCoordinates(
+                            myposition.latitude,
+                            myposition.longitude,
+                          );
+
+                          Placemark place = placemarks[0];
+                          locationController.text =
+                              "${place.name},\n${place.street},\n${place.postalCode},${place.locality},\n${place.administrativeArea},${place.country}";
+
+                          setState(() {});
+                        },
+                        icon: Icon(Icons.gps_fixed),
                       ),
                     ),
                   ),
@@ -320,7 +333,7 @@ Future<void> openGallery() async {
     }
   }
 
-  Future<void> getLocation() async {
+  /*Future<void> getLocation() async {
     try {
       myposition = await _determinePosition();
       lat = myposition.latitude.toString();
@@ -340,7 +353,7 @@ Future<void> openGallery() async {
         SnackBar(content: Text("Location Error: $e"), backgroundColor: Colors.red),
       );
     }
-  }
+  }*/
 
   Future<Position> _determinePosition() async {
     bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
@@ -362,24 +375,91 @@ Future<void> openGallery() async {
   }
 
   void showSubmitDialog() {
-    if (petnamecontroller.text.isEmpty) {
-      return showSnack("Please enter pet name");
+    // VALIDATION 1: PET NAME
+    if (petnamecontroller.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter Pet Name"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
     }
 
-    if (descriptionController.text.length < 10) {
-      return showSnack("Description must be at least 10 characters");
+    // VALIDATION 2: PET TYPE
+    if (selectedPet.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please choose a Pet Type"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
     }
 
+    //VALIDATION 3: PET CATEGORY
+    if (selectedCategory.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please choose Pet Category"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // VALIDATION 4: DESCRIPTION
+    if (descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter description"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // VALIDATION 5: IMAGE
     if (imageFiles.isEmpty) {
-      return showSnack("Select at least 1 image");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please select at least 1 image"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
     }
-
+    
+    // VALIDATION 6: IMAGE
     if (imageFiles.length > 3) {
-    return showSnack("Maximum 3 images allowed (selected: ${imageFiles.length})");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Maximum 3 images allowed"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
     }
 
+    //VALIDATION 7: DESCRIPTION <10
+    if (descriptionController.text.length < 10) {
+      SnackBar snackBar = const SnackBar(
+        content: Text('Description must be minimun 10 characters long'),
+        backgroundColor: Colors.red,
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+      return;
+    }
+    
+    // VALIDATION 8: LOCATION
     if (lat.isEmpty || lng.isEmpty) {
-      return showSnack("Please get your location");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please tap GPS icon to get your location"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
     }
 
     showDialog(
@@ -401,43 +481,8 @@ Future<void> openGallery() async {
     );
   }
 
-  void showSnack(String msg) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), backgroundColor: Colors.red),
-    );
-  }
-
   void submitPet() {
-    if (lat.isEmpty || lng.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Please tap GPS icon to get your location"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    if (imageFiles.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Please select at least 3 image"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    if (imageFiles.length > 3) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Maximum 3 images allowed"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
+    
     List<String> encodedImages = [];
     for (var img in imageFiles) {
       encodedImages.add(base64Encode(img.readAsBytesSync()));
@@ -475,7 +520,7 @@ Future<void> openGallery() async {
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.pop(context);
+          Navigator.pop(context, true); 
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

@@ -19,7 +19,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<PetService> listServices = [];
+  List<PetService> petList = [];//Store pets that come from API
   String status = "Loading...";
   DateFormat formatter = DateFormat('dd/MM/yyyy hh:mm a');
   late double screenWidth, screenHeight;
@@ -31,7 +31,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    loadServices('');
+    loadPetServices('');
   }
 
   @override
@@ -56,7 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           IconButton(
             onPressed: () {
-              loadServices('');
+              loadPetServices('');
             },
             icon: Icon(Icons.refresh),
           ),
@@ -76,7 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
           width: screenWidth,
           child: Column(
             children: [
-              listServices.isEmpty
+              petList.isEmpty
                   ? Expanded(
                       child: Center(
                         child: Column(
@@ -95,10 +95,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                   : Expanded(
                       child: ListView.builder(
-                        itemCount: listServices.length,
+                        itemCount: petList.length,
                         itemBuilder: (BuildContext context, int index) {
-                          // Get first image URL
-                          String? firstImageUrl = getFirstImageUrl(listServices[index]);
+                          // Get first image URL. firstImageUrl extract only the first image as thumbnail
+                          String? firstImageUrl = getFirstImageUrl(petList[index]);
                           
                           return Card(
                             elevation: 4,
@@ -119,7 +119,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     borderRadius: BorderRadius.circular(12),
                                     child: Container(
                                       width: screenWidth * 0.28,
-                                      height: screenWidth * 0.22,
+                                      height: screenWidth * 0.28,
                                       color: Colors.grey[200],
                                       child: firstImageUrl != null
                                           ? Image.network(
@@ -128,7 +128,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                               errorBuilder: (context, error, stackTrace) {
                                                 return Icon(
                                                   Icons.pets,
-                                                  size: 40,
+                                                  size: 60,
                                                   color: Colors.grey,
                                                 );
                                               },
@@ -148,9 +148,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        // TITLE
+                                        // PET NAME
                                         Text(
-                                          listServices[index].petName.toString(),
+                                          petList[index].petName.toString(),
                                           style: const TextStyle(
                                             fontSize: 17,
                                             fontWeight: FontWeight.w600,
@@ -161,9 +161,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                         const SizedBox(height: 4),
 
-                                        // TYPE
+                                        // PET TYPE
                                         Text(
-                                          "Type: ${listServices[index].petType.toString()}",
+                                          "Type: ${petList[index].petType.toString()}",
                                           style: const TextStyle(
                                             fontSize: 14,
                                             color: Colors.black87,
@@ -174,12 +174,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
                                         const SizedBox(height: 4),
 
-                                        // DESCRIPTION EXCERPT
+                                        // PET DESCRIPTION EXCERPT
                                         Text(
-                                          listServices[index].description != null
-                                              ? (listServices[index].description!.length > 50
-                                                  ? "${listServices[index].description!.substring(0, 50)}..."
-                                                  : listServices[index].description!)
+                                          petList[index].description != null
+                                              ? (petList[index].description!.length > 50
+                                                  ? "${petList[index].description!.substring(0, 50)}..."
+                                                  : petList[index].description!)
                                               : "",
                                           style: const TextStyle(
                                             fontSize: 13,
@@ -198,11 +198,11 @@ class _HomeScreenState extends State<HomeScreen> {
                                             vertical: 4,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: Colors.blueGrey.withOpacity(0.15),
+                                            color: const Color.fromARGB(255, 246, 172, 63).withOpacity(0.15),
                                             borderRadius: BorderRadius.circular(8),
                                           ),
                                           child: Text(
-                                            listServices[index].category.toString(),
+                                            petList[index].category.toString(),
                                             style: const TextStyle(
                                               fontSize: 12,
                                               color: Colors.blueGrey,
@@ -213,7 +213,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     ),
                                   ),
 
-                                  // TRAILING ARROW BUTTON
+                                  // TRAILING ARROW BUTTON TO OPEN DIALOG
                                   IconButton(
                                     onPressed: () {
                                       showDetailsDialog(index);
@@ -243,7 +243,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       return TextButton(
                         onPressed: () {
                           curpage = index + 1;
-                          loadServices('');
+                          loadPetServices('');
                         },
                         child: Text(
                           (index + 1).toString(),
@@ -271,96 +271,79 @@ class _HomeScreenState extends State<HomeScreen> {
               MaterialPageRoute(builder: (context) => const LoginPage()),
             );
           } else {
-            await Navigator.push(
+            var result = await Navigator.push(
               context,
               MaterialPageRoute(
                 builder: (context) => Submitpetscreen(user: widget.user),
               ),
             );
-            loadServices('');
+            if(result == true){
+              loadPetServices('');
+            }
           }
         },
         child: Icon(Icons.add),
-        backgroundColor: Colors.orange,
+        backgroundColor: const Color.fromARGB(255, 242, 194, 121),
       ),
     );
   }
 
-  void loadServices(String searchQuery) {
-    listServices.clear();
+  // Function to load pet services
+  void loadPetServices(String searchQuery) {
+  petList.clear();
+  setState(() {
+    status = "Loading...";
+  });
+
+  if (widget.user?.user_id == null || widget.user!.user_id == '0') {
     setState(() {
-      status = "Loading...";
+      petList.clear();
+      status = "Please login to view your pets";
     });
-    
-    // Check if user is logged in
-    if (widget.user?.user_id == null || widget.user?.user_id == '0') {
-      setState(() {
-        listServices.clear();
-        status = "Please login to view your pets";
-      });
-      return;
-    }
-    
-    http.get(
-      Uri.parse(
-        '${MyConfig.baseUrl}/pawpal/api/get_my_pets.php'
-        '?user_id=${widget.user!.user_id}'
-        '&search=$searchQuery'
-        '&curpage=$curpage'
-      ),
-    ).then((response) {
-      print("API Response Status: ${response.statusCode}");
-      print("API Response Body: ${response.body}");
-      
-      if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
-        print("Parsed JSON: $jsonResponse");
-        
-        // Check if status is true (boolean)
-        if (jsonResponse['status'] == true && 
-            jsonResponse['data'] != null) {
-          
-          listServices.clear();
-          for (var item in jsonResponse['data']) {
-            listServices.add(PetService.fromJson(item));
-          }
-          
-          numofpage = jsonResponse['numofpage'] != null 
-              ? int.parse(jsonResponse['numofpage'].toString()) 
-              : 1;
-          numofresult = jsonResponse['numberofresult'] != null
-              ? int.parse(jsonResponse['numberofresult'].toString())
-              : listServices.length;
-          
-          setState(() {
-            if (listServices.isEmpty) {
-              status = "No submission yet";
-            } else {
-              status = "";
+    return;
+  }
+
+  http
+      .get(
+        Uri.parse(
+          '${MyConfig.baseUrl}/pawpal/api/get_my_pets.php'
+          '?user_id=${widget.user!.user_id}'
+          '&search=$searchQuery'
+          '&curpage=$curpage'
+        ),
+      )
+      .then((response) {
+        if (response.statusCode == 200) {
+          var jsonResponse = jsonDecode(response.body);
+
+          if (jsonResponse['status'] == true && jsonResponse['data'] != null) {
+            petList.clear();
+
+            for (var item in jsonResponse['data']) {
+              petList.add(PetService.fromJson(item));
             }
-          });
+
+            numofpage = int.parse(jsonResponse['numofpage'].toString());
+            numofresult =
+                int.parse(jsonResponse['numberofresult'].toString()); // FIXED
+
+            setState(() {
+              status = petList.isEmpty ? "No submission yet" : "";
+            });
+          } else {
+            setState(() {
+              petList.clear();
+              status = jsonResponse['message'] ?? "No pets found";
+            });
+          }
         } else {
-          // No data or failed
           setState(() {
-            listServices.clear();
-            status = jsonResponse['message'] ?? "No pets found";
+            petList.clear();
+            status = "Failed to load pets. Error: ${response.statusCode}";
           });
         }
-      } else {
-        // Request failed
-        setState(() {
-          listServices.clear();
-          status = "Failed to load pets. Error: ${response.statusCode}";
-        });
-      }
-    }).catchError((error) {
-      print("Error Details: $error");
-      setState(() {
-        listServices.clear();
-        status = "Error loading pets: $error";
       });
-    });
-  }
+    }
 
   // Helper function to get first image URL
   String? getFirstImageUrl(PetService pet) {
@@ -414,7 +397,7 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {
                 String search = searchController.text;
                 curpage = 1;
-                loadServices(search);
+                loadPetServices(search);
                 Navigator.of(context).pop();
               },
             ),
@@ -425,7 +408,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void showDetailsDialog(int index) {
-    PetService pet = listServices[index];
+    PetService pet = petList[index];
     String? firstImageUrl = getFirstImageUrl(pet);
     
     showDialog(
@@ -463,25 +446,29 @@ class _HomeScreenState extends State<HomeScreen> {
                   
                   SizedBox(height: 15),
                   
-                  // PET DETAILS
+                  // PET DETAILS inside the dialog
+                  //Pet type
                   ListTile(
                     leading: Icon(Icons.pets, color: Colors.blue),
                     title: Text("Type"),
                     subtitle: Text(pet.petType.toString()),
                   ),
                   
+                  //Pet category
                   ListTile(
                     leading: Icon(Icons.category, color: Colors.green),
                     title: Text("Category"),
                     subtitle: Text(pet.category.toString()),
                   ),
                   
+                  //Pet description
                   ListTile(
                     leading: Icon(Icons.description, color: Colors.orange),
                     title: Text("Description"),
                     subtitle: Text(pet.description ?? "No description"),
                   ),
                   
+                  //Pet location using lat lng
                   if (pet.lat != null && pet.lng != null)
                     ListTile(
                       leading: Icon(Icons.location_on, color: Colors.red),
@@ -498,7 +485,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   
                   SizedBox(height: 10),
                   
-                  // CONTACT INFO
+                  // CONTACT INFO ABOUT PET OWNER
                   if (pet.userPhone != null || pet.userEmail != null)
                     Card(
                       color: Colors.grey[50],
