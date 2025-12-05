@@ -204,7 +204,7 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
                     ),
                   ),
 
-                  SizedBox(height: 20),
+                  SizedBox(height: 10),
 
                   //SUBMIT BUTTON 
                   ElevatedButton(
@@ -290,7 +290,7 @@ Future<void> openGallery() async {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text("Maximum 3 images allowed")),
     );
-  }
+  } 
   }
 }
 
@@ -333,51 +333,7 @@ Future<void> openGallery() async {
   }
 
   void showSubmitDialog() {
-    // VALIDATION 1: PET NAME
-    if (petnamecontroller.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter Pet Name"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    // VALIDATION 2: PET TYPE
-    if (selectedPet.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please choose a Pet Type"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    //VALIDATION 3: PET CATEGORY
-    if (selectedCategory.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please choose Pet Category"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    // VALIDATION 4: DESCRIPTION
-    if (descriptionController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Please enter description"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    // VALIDATION 5: IMAGE
+    // VALIDATION 1: EMPTY IMAGE
     if (imageFiles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -387,8 +343,7 @@ Future<void> openGallery() async {
       );
       return;
     }
-    
-    // VALIDATION 6: IMAGE
+    // VALIDATION 2: MORE THAN 3 IMAGE
     if (imageFiles.length > 3) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -398,7 +353,46 @@ Future<void> openGallery() async {
       );
       return;
     }
-
+    // VALIDATION 3: EMPTY PET NAME
+    if (petnamecontroller.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter Pet Name"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    // VALIDATION 4: EMPTY PET TYPE
+    if (selectedPet.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please choose a Pet Type"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    //VALIDATION 5: EMPTY PET CATEGORY
+    if (selectedCategory.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please choose Pet Category"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+    // VALIDATION 6: EMPTY DESCRIPTION
+    if (descriptionController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please enter description"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
     //VALIDATION 7: DESCRIPTION <10
     if (descriptionController.text.length < 10) {
       SnackBar snackBar = const SnackBar(
@@ -408,7 +402,6 @@ Future<void> openGallery() async {
       ScaffoldMessenger.of(context).showSnackBar(snackBar);
       return;
     }
-    
     // VALIDATION 8: LOCATION
     if (lat.isEmpty || lng.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -419,7 +412,6 @@ Future<void> openGallery() async {
       );
       return;
     }
-
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
