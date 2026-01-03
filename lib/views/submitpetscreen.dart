@@ -25,16 +25,26 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
     'Dog', 
     'Rabbit', 
     'Others'];
+  List<String> petGender = [
+    'Male', 
+    'Female'];
+  List<String> petHealth = [
+    'Healthy', 
+    'Sick',
+    'Recovering'];
   List<String> category = [
     'Adoption', 
     'Donation Request', 
     'Help/Rescue'];
 
   TextEditingController petnamecontroller = TextEditingController();
+  TextEditingController petagecontroller = TextEditingController();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController locationController = TextEditingController();
 
   String selectedPet = '';
+  String selectedGender = '';
+  String selectedHealth = '';
   String selectedCategory = '';
 
   String lat = "";
@@ -123,7 +133,6 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
                       }),
                     ),
                   SizedBox(height: 10),
-
                   //PET NAME
                   TextField(
                     controller: petnamecontroller,
@@ -134,7 +143,40 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
                   ),
 
                   SizedBox(height: 10),
-
+                  //PET GENDER
+                  DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      labelText: 'Pet Gender',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: petGender.map((String value) {
+                      return DropdownMenuItem(value: value, child: Text(value));
+                    }).toList(),
+                    onChanged: (value) => setState(() => selectedGender = value!),
+                  ),
+                  SizedBox(height: 10),
+                  //PET AGE
+                  TextField(
+                    controller: petagecontroller,
+                    decoration: InputDecoration(
+                      labelText: 'Pet Age',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  
+                  SizedBox(height: 10),
+                  //PET HEALTH 
+                  DropdownButtonFormField<String>(
+                    decoration: InputDecoration(
+                      labelText: 'Pet Health',
+                      border: OutlineInputBorder(),
+                    ),
+                    items: petHealth.map((String value) {
+                      return DropdownMenuItem(value: value, child: Text(value));
+                    }).toList(),
+                    onChanged: (value) => setState(() => selectedHealth = value!),
+                  ),
+                  SizedBox(height: 10),
                   //PET TYPE 
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
@@ -146,9 +188,8 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
                     }).toList(),
                     onChanged: (value) => setState(() => selectedPet = value!),
                   ),
-
+                  
                   SizedBox(height: 10),
-
                   //CATEGORY
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
@@ -449,6 +490,9 @@ Future<void> openGallery() async {
       body: {
         "user_id": widget.user!.user_id.toString(),
         "pet_name": petnamecontroller.text.trim(),
+        "pet_gender": selectedGender,
+        "pet_age": petagecontroller.text.trim(),
+        "pet_health": selectedHealth,
         "pet_type": selectedPet,
         "category": selectedCategory,
         "description": descriptionController.text.trim(),

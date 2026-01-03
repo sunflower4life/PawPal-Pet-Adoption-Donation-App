@@ -11,6 +11,9 @@ if ($_SERVER['REQUEST_METHOD'] != 'POST') {
 // Receive POST values
 $userid = $_POST['user_id'];
 $petname = addslashes($_POST['pet_name']);
+$petgender = $_POST['pet_gender'];
+$petage = $_POST['pet_age'];
+$pethealth = $_POST['pet_health'];
 $pettype = $_POST['pet_type'];
 $category = $_POST['category'];
 $description = addslashes($_POST['description']);
@@ -29,8 +32,8 @@ if (!$image1) {
 }
 
 // Insert new pet record
-$sqlinsert = "INSERT INTO `tbl_pets`(`user_id`, `pet_name`, `pet_type`, `category`, `description`, `lat`, `lng`) 
-VALUES ('$userid','$petname','$pettype','$category','$description','$lat','$lng')";
+$sqlinsert = "INSERT INTO `tbl_pets`(`user_id`, `pet_name`, `pet_gender`, `pet_age`, `pet_health`,`pet_type`, `category`, `description`, `lat`, `lng`) 
+VALUES ('$userid','$petname','$petgender','$petage','$pethealth','$pettype','$category','$description','$lat','$lng')";
 
 try {
     if ($conn->query($sqlinsert) === TRUE) {

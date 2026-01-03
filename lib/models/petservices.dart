@@ -2,6 +2,9 @@ class PetService {
   String? petId;
   String? userId;
   String? petName;
+  String? petGender;
+  String? petAge;
+  String? petHealth;
   String? petType;
   String? category;
   String? description;
@@ -20,6 +23,9 @@ class PetService {
     this.petId,
     this.userId,
     this.petName,
+    this.petGender,
+    this.petAge,
+    this.petHealth,
     this.petType,
     this.category,
     this.description,
@@ -37,6 +43,9 @@ class PetService {
     petId = json['pet_id'];
     userId = json['user_id'];
     petName = json['pet_name'];
+    petGender = json['pet_gender'];
+    petAge = json['pet_age'];
+    petHealth = json['pet_health'];
     petType = json['pet_type'];
     category = json['category'];
     description = json['description'];
@@ -58,6 +67,9 @@ class PetService {
     data['pet_id'] = petId;
     data['user_id'] = userId;
     data['pet_name'] = petName;
+    data['pet_gender'] = petGender;
+    data['pet_age'] = petAge;
+    data['pet_health'] = petHealth;
     data['pet_type'] = petType;
     data['category'] = category;
     data['description'] = description;
