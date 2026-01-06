@@ -1,12 +1,17 @@
+// ignore_for_file: prefer_typing_uninitialized_variables
+
 import 'dart:convert';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
 import 'package:pawpal/models/petservices.dart';
-import 'package:pawpal/models/user.dart';
 import 'package:pawpal/myconfig.dart';
 import 'package:pawpal/views/loginscreen.dart';
+import 'package:pawpal/models/user.dart';
 import 'package:pawpal/views/submitpetscreen.dart';
 import 'package:pawpal/views/petdetailsscreen.dart';
+import 'package:pawpal/views/profilepage.dart';
 
 class HomeScreen extends StatefulWidget {
   final User? user;
@@ -18,358 +23,343 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<PetService> allPets = []; // All pets from database
-  List<PetService> filteredPets = []; // Filtered/searched pets
+  List<PetService> allPets = [];
+  List<PetService> filteredPets = [];
   String status = "Loading...";
+  DateFormat formatter = DateFormat('dd/MM/yyyy hh:mm a');
   late double screenWidth, screenHeight;
-  
+  int numofpage = 1;
+  int curpage = 1;
+  int numofresult = 0;
+  var color;
+
   // Filter variables
-  String selectedTypeFilter = "All"; // Filter dropdown value
+  String selectedTypeFilter = "All";
   List<String> petTypeFilter = ["All", "Cat", "Dog", "Rabbit", "Others"];
-  
-  // Search variable sbb dlm assignment nk search bar
+
+  // Search variable
   TextEditingController searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    // Load all public pets when page opens
     loadAllPublicPets();
   }
 
   @override
   Widget build(BuildContext context) {
-    print("HomeScreen built with user: ${widget.user?.user_id}");
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
-    if (screenWidth > 600) {
-      screenWidth = 600;
-    }
 
-    return Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-        title: Text('All Pets'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.refresh),
-            onPressed: () {
-              loadAllPublicPets();
-            },
-          ),
-          /*if (widget.user?.user_id != null && widget.user?.user_id != '0')
-            IconButton(
-              icon: Icon(Icons.person),
-              onPressed: () {
-                // Navigate to profile screen (you'll create this later)
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Profile screen coming soon")),
-                );
-              },
-            ),*/
-          IconButton(
-            icon: Icon(Icons.logout),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => LoginPage()),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Center(
-        child: SizedBox(
-          width: screenWidth,
-          child: Column(
-            children: [
-              // SEARCH BAR
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: TextField(
-                  controller: searchController,
-                  onChanged: (value) {
-                    applyFiltersAndSearch();
-                  },
-                  decoration: InputDecoration(
-                    hintText: 'Search pet name...',
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
+    final contentWidth = screenWidth > 900 ? 900.0 : screenWidth;
+
+    return WillPopScope(
+      onWillPop: () async {
+        return await _showExitDialog();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.grey.shade100,
+
+        // ────────────────── APP BAR ──────────────────
+        appBar: buildModernAppBar(),
+
+        // ────────────────── BODY ──────────────────
+        body: Center(
+          child: SizedBox(
+            width: contentWidth,
+            child: Column(
+              children: [
+                // SEARCH BAR
+                Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: TextField(
+                    controller: searchController,
+                    onChanged: (value) {
+                      applyFiltersAndSearch();
+                    },
+                    decoration: InputDecoration(
+                      hintText: 'Search pet name...',
+                      prefixIcon: const Icon(Icons.search),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      contentPadding:
+                          const EdgeInsets.symmetric(horizontal: 15),
+                      filled: true,
+                      fillColor: Colors.white,
                     ),
-                    contentPadding: EdgeInsets.symmetric(horizontal: 15),
                   ),
                 ),
-              ),
 
-              // FILTER DROPDOWN
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                child: Row(
-                  children: [
-                    Text(
-                      "Filter by Type:",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    SizedBox(width: 10),
-                    Expanded(
-                      child: DropdownButton<String>(
-                        value: selectedTypeFilter,
-                        isExpanded: true,
-                        items: petTypeFilter.map((String value) {
-                          return DropdownMenuItem<String>(
-                            value: value,
-                            child: Text(value),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            selectedTypeFilter = newValue ?? "All";
-                          });
-                          applyFiltersAndSearch();
-                        },
+                // FILTER DROPDOWN
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Row(
+                    children: [
+                      Text(
+                        "Filter by Type:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
                       ),
-                    ),
-                  ],
+                      SizedBox(width: 10),
+                      Expanded(
+                        child: DropdownButton<String>(
+                          value: selectedTypeFilter,
+                          isExpanded: true,
+                          items: petTypeFilter.map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (String? newValue) {
+                            setState(() {
+                              selectedTypeFilter = newValue ?? "All";
+                            });
+                            applyFiltersAndSearch();
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
 
-              SizedBox(height: 10),
+                const SizedBox(height: 10),
 
-              // PET LIST
-              allPets.isEmpty
-                ? Expanded(
-                    child: Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(Icons.pets, size: 64, color: Colors.grey),
-                          SizedBox(height: 12),
-                          Text(
-                            status,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 18, color: Colors.grey),
-                          ),
-                        ],
-                      ),
-                    ),
-                  )
-                : Expanded(
-                    child: filteredPets.isEmpty
-                        ? Center(
-                            child: Text(
-                              "No pets match your search/filter",
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          )
-                        : ListView.builder(
-                            itemCount: filteredPets.length,
-                            itemBuilder: (BuildContext context, int index) {
-                              String? firstImageUrl =
-                                getFirstImageUrl(filteredPets[index]);
-
-                              return GestureDetector(
-                                onTap: () {
-                                  // Navigate to Pet Details screen
-                                  navigateToPetDetails(filteredPets[index]);
-                                },
-                                child: Card(
-                                  elevation: 4,
-                                  margin: const EdgeInsets.symmetric(
-                                    vertical: 6,
-                                    horizontal: 8,
-                                  ),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(10),
-                                    child: Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        // IMAGE THUMBNAIL
-                                        ClipRRect(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
-                                          child: Container(
-                                            width: screenWidth * 0.25,
-                                            height: screenWidth * 0.25,
-                                            color: Colors.grey[200],
-                                            child: firstImageUrl != null
-                                                ? Image.network(
-                                                    firstImageUrl,
-                                                    fit: BoxFit.cover,
-                                                    errorBuilder: (context,
-                                                      error,
-                                                      stackTrace) {
-                                                      return Icon(
-                                                        Icons.pets,size: 50,
-                                                        color: Colors.grey,
-                                                      );
-                                                    },
-                                                  )
-                                                : Icon(
-                                                    Icons.pets,size: 40,
-                                                    color: Colors.grey,
-                                                  ),
-                                            ),
-                                          ),
-
-                                          const SizedBox(width: 12),
-
-                                          // TEXT DETAILS
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                // PET NAME
-                                                Text(
-                                                  filteredPets[index].petName.toString(),
-                                                  style: const TextStyle(
-                                                    fontSize: 16,
-                                                    fontWeight:
-                                                        FontWeight.bold,
-                                                  ),
-                                                  maxLines: 1,
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-
-                                                const SizedBox(height: 4),
-
-                                                // PET TYPE
-                                                Text(
-                                                  "Type: ${filteredPets[index].petType.toString()}",
-                                                  style: const TextStyle(
-                                                    fontSize: 13,
-                                                    color: Colors.black87,
-                                                  ),
-                                                ),
-
-                                                const SizedBox(height: 4),
-
-                                                // PET AGE
-                                                Text(
-                                                  "Age: ${filteredPets[index].petAge.toString()}",
-                                                  style: const TextStyle(
-                                                    fontSize: 13,
-                                                    color: Colors.black87,
-                                                  ),
-                                                ),
-
-                                                const SizedBox(height: 6),
-
-                                                // CATEGORY BADGE
-                                                Container(
-                                                  padding:
-                                                      const EdgeInsets
-                                                          .symmetric(
-                                                    horizontal: 8,
-                                                    vertical: 4,
-                                                  ),
-                                                  decoration: BoxDecoration(
-                                                    color: getCategoryColor(
-                                                            filteredPets[index]
-                                                                .category)
-                                                        .withOpacity(0.2),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
-                                                  child: Text(
-                                                    filteredPets[index]
-                                                        .category
-                                                        .toString(),
-                                                    style: TextStyle(
-                                                      fontSize: 11,
-                                                      color:
-                                                          getCategoryColor(
-                                                              filteredPets[index].category),
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
-            ],
+                // PET LIST
+                Expanded(
+                  child: allPets.isEmpty
+                      ? _buildEmptyState()
+                      : _buildPetList(),
+                ),
+              ],
+            ),
           ),
         ),
+
+        // ────────────────── FAB ──────────────────
+        floatingActionButton: (widget.user != null &&
+                    widget.user?.user_id != null &&
+                    widget.user?.user_id != '0')
+            ? FloatingActionButton.extended(
+                backgroundColor: const Color.fromARGB(255, 242, 194, 121),
+                icon: const Icon(Icons.add),
+                label: const Text("Add Pet"),
+                onPressed: () async {
+                  var result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          Submitpetscreen(user: widget.user),
+                    ),
+                  );
+                  if (result == true) {
+                    loadAllPublicPets();
+                  }
+                },
+              )
+            : null,
       ),
-      floatingActionButton:(widget.user != null && 
-                      widget.user?.user_id != null &&
-                      widget.user?.user_id != '0')
-          ? FloatingActionButton(
-              onPressed: () async {
-                var result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        Submitpetscreen(user: widget.user),
-                  ),
-                );
-                if (result == true) {
-                  loadAllPublicPets();
-                }
-              },
-              child: Icon(Icons.add),
-              backgroundColor:
-                  const Color.fromARGB(255, 242, 194, 121),
-            )
-          : null,
     );
   }
 
-  // Load ALL public pets from API
+  Widget _buildPetList() {
+    return ListView.builder(
+      padding: const EdgeInsets.all(10),
+      itemCount: filteredPets.length,
+      itemBuilder: (context, index) {
+        String? firstImageUrl = getFirstImageUrl(filteredPets[index]);
+
+        return Card(
+          elevation: 3,
+          margin: const EdgeInsets.symmetric(vertical: 6),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(14),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            onTap: () => navigateToPetDetails(filteredPets[index]),
+            child: Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                children: [
+                  // IMAGE THUMBNAIL
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      width: 110,
+                      height: 90,
+                      color: Colors.grey.shade200,
+                      child: firstImageUrl != null
+                          ? Image.network(
+                              firstImageUrl,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) {
+                                return Icon(
+                                  Icons.pets,
+                                  size: 50,
+                                  color: Colors.grey,
+                                );
+                              },
+                            )
+                          : Icon(
+                              Icons.pets,
+                              size: 40,
+                              color: Colors.grey,
+                            ),
+                    ),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  // TEXT DETAILS
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // PET NAME
+                        Text(
+                          filteredPets[index].petName.toString(),
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        // PET TYPE
+                        Text(
+                          "Type: ${filteredPets[index].petType.toString()}",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+
+                        const SizedBox(height: 4),
+
+                        // PET AGE
+                        Text(
+                          "Age: ${filteredPets[index].petAge.toString()}",
+                          style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black87,
+                          ),
+                        ),
+
+                        const SizedBox(height: 6),
+
+                        // CATEGORY BADGE
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: getCategoryColor(
+                                    filteredPets[index].category)
+                                .withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            filteredPets[index].category.toString(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: getCategoryColor(
+                                  filteredPets[index].category),
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: Colors.grey,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.pets, size: 72, color: Colors.grey.shade400),
+          const SizedBox(height: 16),
+          Text(
+            status.isEmpty ? "No pets available" : status,
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
+          ),
+        ],
+      ),
+    );
+  }
+
   void loadAllPublicPets() {
+    allPets.clear();
+    filteredPets.clear();
     setState(() {
       status = "Loading...";
     });
 
-    http.get(
-      Uri.parse(
-        '${MyConfig.baseUrl}/pawpal/api/get_my_pets.php',
-      ),
-    ).then((response) {
-      print("API Response: ${response.body}");
+    http
+        .get(
+          Uri.parse(
+            '${MyConfig.baseUrl}/pawpal/api/get_my_pets.php',
+          ),
+        )
+        .then((response) {
+          print("API Response: ${response.body}");
 
-      if (response.statusCode == 200) {
-        var jsonResponse = jsonDecode(response.body);
+          if (response.statusCode == 200) {
+            var jsonResponse = jsonDecode(response.body);
 
-        if (jsonResponse['status'] == true &&
-            jsonResponse['data'] != null) {
-          setState(() {
-            allPets.clear();
-            for (var item in jsonResponse['data']) {
-              allPets.add(PetService.fromJson(item));
+            if (jsonResponse['status'] == true &&
+                jsonResponse['data'] != null) {
+              setState(() {
+                allPets.clear();
+                for (var item in jsonResponse['data']) {
+                  allPets.add(PetService.fromJson(item));
+                }
+                // Apply initial filter
+                filteredPets = List.from(allPets);
+                status = allPets.isEmpty ? "No pets available" : "";
+              });
+            } else {
+              setState(() {
+                allPets.clear();
+                filteredPets.clear();
+                status = jsonResponse['message'] ?? "No pets found";
+              });
             }
-            // Apply initial filter
-            filteredPets = List.from(allPets);
-            status = allPets.isEmpty ? "No pets available" : "";
-          });
-        } else {
+          } else {
+            setState(() {
+              allPets.clear();
+              filteredPets.clear();
+              status = "Failed to load pets";
+            });
+          }
+        })
+        .catchError((error) {
           setState(() {
             allPets.clear();
-            status = jsonResponse['message'] ?? "No pets found";
+            filteredPets.clear();
+            status = "Error: $error";
           });
-        }
-      } else {
-        setState(() {
-          status = "Failed to load pets";
         });
-      }
-    });
   }
 
   // Apply search and filter
@@ -444,5 +434,210 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  AppBar buildModernAppBar() {
+    return AppBar(
+      elevation: 0,
+      backgroundColor: const Color.fromARGB(255, 72, 38, 44),
+      foregroundColor: const Color.fromARGB(255, 255, 244, 215),
+      titleSpacing: 16,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: const [
+          Text(
+            "PawPal",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 0.5,
+            ),
+          ),
+          SizedBox(height: 2),
+          Text(
+            "Pet Adoption & Donation",
+            style: TextStyle(fontSize: 12, color: Colors.white70),
+          ),
+        ],
+      ),
+      actions: [
+        _buildAppBarIcon(
+          icon: Icons.search,
+          tooltip: "Search",
+          onTap: showSearchDialog,
+        ),
+        _buildAppBarIcon(
+          icon: Icons.refresh,
+          tooltip: "Refresh",
+          onTap: () => loadAllPublicPets(),
+        ),
+        if (widget.user != null && widget.user?.user_id != '0')
+          _buildAppBarIcon(
+            icon: Icons.person,
+            tooltip: "Profile",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProfilePage(user: widget.user!),
+                ),
+              );
+            },
+          ),
+        _buildAppBarIcon(
+          icon: Icons.logout,
+          tooltip: "Logout",
+          onTap: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => LoginPage()),
+            );
+          },
+        ),
+        const SizedBox(width: 8),
+      ],
+    );
+  }
+
+  Widget _buildAppBarIcon({
+    required IconData icon,
+    required VoidCallback onTap,
+    String? tooltip,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 4),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Tooltip(
+          message: tooltip ?? '',
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.15),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(icon, size: 20),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void showSearchDialog() {
+    TextEditingController tempSearchController = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // TITLE
+                const Text(
+                  "Search Pets",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
+
+                const SizedBox(height: 12),
+
+                // SEARCH FIELD
+                TextField(
+                  controller: tempSearchController,
+                  autofocus: true,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (value) {
+                    _performSearch(value);
+                  },
+                  decoration: InputDecoration(
+                    hintText: "e.g. Fluffy, Max, Bella",
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ACTION BUTTONS
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancel"),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color.fromARGB(255, 72, 38, 44),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        _performSearch(tempSearchController.text);
+                      },
+                      child: const Text("Search"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _performSearch(String query) {
+    Navigator.pop(context);
+
+    if (query.trim().isEmpty) {
+      searchController.clear();
+      applyFiltersAndSearch();
+    } else {
+      searchController.text = query.trim();
+      applyFiltersAndSearch();
+    }
+  }
+
+  Future<bool> _showExitDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text("Exit App"),
+            content: const Text("Are you sure you want to exit PawPal?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text("Exit"),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 }
