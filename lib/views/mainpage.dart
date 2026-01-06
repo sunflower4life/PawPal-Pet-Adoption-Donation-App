@@ -307,8 +307,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      floatingActionButton: widget.user?.user_id != null &&
-              widget.user?.user_id != '0'
+      floatingActionButton:(widget.user != null && 
+                      widget.user?.user_id != null &&
+                      widget.user?.user_id != '0')
           ? FloatingActionButton(
               onPressed: () async {
                 var result = await Navigator.push(

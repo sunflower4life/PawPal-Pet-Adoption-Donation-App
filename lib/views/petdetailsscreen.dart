@@ -101,8 +101,16 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text("Type", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                                      Text(widget.pet.petType ?? "Unknown", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                      const Text("Type", 
+                                      style: TextStyle(
+                                        fontSize: 12, 
+                                        color: Colors.grey
+                                      )),
+                                      Text(widget.pet.petType ?? "Unknown", 
+                                      style: const TextStyle(
+                                        fontSize: 16, 
+                                        fontWeight: FontWeight.bold
+                                      )),
                                     ],
                                   ),
                                 ],
@@ -117,8 +125,16 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text("Age", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                                      Text("${widget.pet.petAge ?? '0'} years old", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                      const Text("Age", 
+                                      style: TextStyle(
+                                        fontSize: 12, 
+                                        color: Colors.grey
+                                      )),
+                                      Text("${widget.pet.petAge ?? '0'} years old", 
+                                      style: const TextStyle(
+                                        fontSize: 16, 
+                                        fontWeight: FontWeight.bold
+                                      )),
                                     ],
                                   ),
                                 ],
@@ -134,8 +150,16 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text("Gender", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                                      Text(widget.pet.petGender ?? "Unknown", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                      const Text("Gender", 
+                                      style: TextStyle(
+                                        fontSize: 12, 
+                                        color: Colors.grey
+                                      )),
+                                      Text(widget.pet.petGender ?? "Unknown", 
+                                      style: const TextStyle(
+                                        fontSize: 16, 
+                                        fontWeight: FontWeight.bold
+                                      )),
                                     ],
                                   ),
                                 ],
@@ -150,8 +174,16 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                                   Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      const Text("Health Status", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                                      Text(widget.pet.petHealth ?? "Unknown", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                      const Text("Health Status", 
+                                      style: TextStyle(
+                                        fontSize: 12, 
+                                        color: Colors.grey
+                                      )),
+                                      Text(widget.pet.petHealth ?? "Unknown", 
+                                      style: const TextStyle(
+                                        fontSize: 16, 
+                                        fontWeight: FontWeight.bold
+                                      )),
                                     ],
                                   ),
                                 ],
@@ -183,11 +215,19 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                       const SizedBox(height: 20),
 
                       // DESCRIPTION
-                      const Text("Description", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                      const Text("Description", 
+                      style: TextStyle(
+                        fontSize: 18, 
+                        fontWeight: FontWeight.bold
+                      )),
                       const SizedBox(height: 8),
                       Text(
                         widget.pet.description ?? "No description",
-                        style: const TextStyle(fontSize: 14, color: Colors.black87, height: 1.5),
+                        style: const TextStyle(
+                          fontSize: 14, 
+                          color: Colors.black87, 
+                          height: 1.5
+                        ),
                       ),
 
                       const SizedBox(height: 20),
@@ -197,9 +237,17 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Location", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            const Text("Location", 
+                            style: TextStyle(
+                              fontSize: 18, 
+                              fontWeight: FontWeight.bold
+                            )),
                             const SizedBox(height: 8),
-                            Text("Lat: ${widget.pet.lat}, Lng: ${widget.pet.lng}", style: const TextStyle(fontSize: 14, color: Colors.black87)),
+                            Text("Lat: ${widget.pet.lat}, Lng: ${widget.pet.lng}", 
+                            style: const TextStyle(
+                              fontSize: 14, 
+                              color: Colors.black87
+                            )),
                             const SizedBox(height: 20),
                           ],
                         ),
@@ -212,7 +260,11 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text("Posted By", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                              const Text("Posted By", 
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold, 
+                                fontSize: 14
+                              )),
                               const SizedBox(height: 8),
                               if (widget.pet.userName != null) Text("Name: ${widget.pet.userName}"),
                               if (widget.pet.userEmail != null) Text("Email: ${widget.pet.userEmail}"),
@@ -229,7 +281,11 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Request to Adopt", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            const Text("Request to Adopt", 
+                            style: TextStyle(
+                              fontSize: 20, 
+                              fontWeight: FontWeight.bold
+                            )),
                             const SizedBox(height: 12),
                             TextField(
                               controller: motivationController,
@@ -259,7 +315,12 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : const Text("Submit Adoption Request", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                    : const Text("Submit Adoption Request", 
+                                    style: TextStyle(
+                                      fontSize: 16, 
+                                      fontWeight: FontWeight.bold, 
+                                      color: Colors.white
+                                    )),
                               ),
                             ),
                           ],
@@ -272,7 +333,11 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Make a Donation", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                            const Text("Make a Donation", 
+                            style: TextStyle(
+                              fontSize: 20, 
+                              fontWeight: FontWeight.bold
+                            )),
                             const SizedBox(height: 12),
 
                             DropdownButtonFormField<String>(
