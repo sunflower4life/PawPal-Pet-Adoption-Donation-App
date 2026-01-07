@@ -164,7 +164,7 @@ class _ProfilePageState extends State<ProfilePage> {
                                   )
                                 : ClipOval(
                                     child: Image.network(
-                                      '${MyConfig.baseUrl}/pawpal/uploads/profile_${widget.user.user_id}.jpg',
+                                      '${MyConfig.baseUrl}/pawpal/assets/profiles/profile_${widget.user.user_id}.jpg?t=${DateTime.now().millisecondsSinceEpoch}',
                                       fit: BoxFit.cover,
                                       errorBuilder:
                                           (context, error, stackTrace) {
