@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:pawpal/models/petservices.dart';
 import 'package:pawpal/models/user.dart';
 import 'package:pawpal/myconfig.dart';
+import 'package:pawpal/views/donationpaymentpage.dart';
 import 'package:pawpal/views/mydonationsscreen.dart';
 
 class PetDetailsScreen extends StatefulWidget {
@@ -630,70 +631,94 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
   }
 
   void submitDonationToAPI() {
-    setState(() {
-      isSubmittingDonation = true;
-    });
+  setState(() {
+    isSubmittingDonation = true;
+  });
 
-    String amount = '';
-    String description = '';
+  String amount = '';
+  String description = '';
 
-    if (donationType == 'Money') {
-      amount = donationAmountController.text.trim();
-    } else {
-      description = donationDescriptionController.text.trim();
-    }
+  if (donationType == 'Money') {
+    amount = donationAmountController.text.trim();
+  } else {
+    description = donationDescriptionController.text.trim();
+  }
 
-    http.post(
-      Uri.parse('${MyConfig.baseUrl}/pawpal/api/submit_donation.php'),
-      body: {
-        "user_id": widget.user!.user_id.toString(),
-        "pet_id": widget.pet.petId.toString(),
-        "donation_type": donationType,
-        "amount": amount,
-        "description": description,
-      },
-    ).then((response) {
-      print("Response: ${response.body}");
+  http
+      .post(
+        Uri.parse('${MyConfig.baseUrl}/pawpal/api/submit_donation.php'),
+        body: {
+          "user_id": widget.user!.user_id.toString(),
+          "pet_id": widget.pet.petId.toString(),
+          "donation_type": donationType,
+          "amount": amount,
+          "description": description,
+        },
+      )
+      .then((response) {
+        print("Response: ${response.body}");
 
-      setState(() {
-        isSubmittingDonation = false;
-      });
+        setState(() {
+          isSubmittingDonation = false;
+        });
 
-      if (response.statusCode == 200) {
-        var res = jsonDecode(response.body);
+        if (response.statusCode == 200) {
+          var res = jsonDecode(response.body);
 
-        if (res['status'] == true) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    const SnackBar(
-      content: Text("Donation submitted successfully!"),
-      backgroundColor: Colors.green,
-    ),
-  );
-  
-  // Navigate to My Donations screen
+          if (res['status'] == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Donation submitted successfully!"),
+                backgroundColor: Colors.green,
+              ),
+            );
+
+            // If Money donation, navigate to payment gateway
+            if (donationType == 'Money') {
+              double donationAmount = double.parse(amount);
+              int petIdInt = int.parse(widget.pet.petId ?? '0');
+              
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DonationPaymentPage(
+                    user: widget.user!,
+                    amount: donationAmount,
+                    petId: petIdInt,
+                    petName: widget.pet.petName ?? "Pet",
+                  ),
+                ),
+              );
+            } else {
+              // If Food or Medical donation, navigate to My Donations
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(
                   builder: (context) => MyDonationsScreen(user: widget.user),
                 ),
               );
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(res['message'] ?? "Failed"),
-                  backgroundColor: Colors.red,
-                ),
-              );
             }
-      }
-    }).catchError((error) {
-      setState(() {
-        isSubmittingDonation = false;
-      });
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(res['message'] ?? "Failed"),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+        }
+      })
+      .catchError((error) {
+        setState(() {
+          isSubmittingDonation = false;
+        });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $error"), backgroundColor: Colors.red),
-      );
-    });
-  }
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error: $error"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      });
+}
 }
