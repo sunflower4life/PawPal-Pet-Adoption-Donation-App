@@ -155,39 +155,29 @@ class _ProfilePageState extends State<ProfilePage> {
                           child: CircleAvatar(
                             radius: 50,
                             backgroundColor: Colors.grey[300],
-                            child: profileImage != null
-                                ? ClipOval(
-                                    child: Image.file(
-                                      profileImage!,
-                                      fit: BoxFit.cover,
+                            backgroundImage: profileImage != null
+                                ? FileImage(profileImage!)
+                                : NetworkImage(
+                                        '${MyConfig.baseUrl}/pawpal/assets/profiles/profile_${widget.user.user_id}.jpg?t=${DateTime.now().millisecondsSinceEpoch}',
+                                      )
+                                      as ImageProvider,
+                            onBackgroundImageError: (_, __) {},
+                            child: profileImage == null
+                                ? Text(
+                                    widget.user.name
+                                            ?.substring(0, 1)
+                                            .toUpperCase() ??
+                                        'U',
+                                    style: const TextStyle(
+                                      fontSize: 32,
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
                                     ),
                                   )
-                                : ClipOval(
-                                    child: Image.network(
-                                      '${MyConfig.baseUrl}/pawpal/assets/profiles/profile_${widget.user.user_id}.jpg?t=${DateTime.now().millisecondsSinceEpoch}',
-                                      fit: BoxFit.cover,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Container(
-                                          color: const Color.fromARGB(
-                                              255, 72, 38, 44),
-                                          child: Text(
-                                            widget.user.name
-                                                    ?.substring(0, 1)
-                                                    .toUpperCase() ??
-                                                'U',
-                                            style: const TextStyle(
-                                              fontSize: 32,
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
+                                : null,
                           ),
                         ),
+
 
                         const SizedBox(height: 12),
 
