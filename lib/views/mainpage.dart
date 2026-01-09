@@ -13,6 +13,7 @@ import 'package:pawpal/views/mydonationsscreen.dart';
 import 'package:pawpal/views/submitpetscreen.dart';
 import 'package:pawpal/views/petdetailsscreen.dart';
 import 'package:pawpal/views/profilepage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
   final User? user;
@@ -44,8 +45,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+
+    // If user is null or invalid, force logout
+    if (widget.user == null ||
+        widget.user?.user_id == null ||
+        widget.user?.user_id == '0') {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _logout();
+      });
+      return;
+    }
+
     loadAllPublicPets();
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -521,12 +534,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _buildAppBarIcon(
           icon: Icons.logout,
           tooltip: "Logout",
-          onTap: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => LoginPage()),
-            );
-          },
+          onTap: _logout,
         ),
         const SizedBox(width: 8),
       ],
@@ -673,5 +681,18 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ) ??
         false;
+  }
+
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // clears user_id, email, rememberMe, etc.
+
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
+    );
   }
 }
