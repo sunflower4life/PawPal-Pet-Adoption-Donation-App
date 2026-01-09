@@ -390,7 +390,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                               width: double.infinity,
                               child: ElevatedButton(
                                 style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color.fromARGB(255, 33, 150, 243),
+                                  backgroundColor: const Color.fromRGBO(242, 194, 121, 1),
                                   minimumSize: const Size(double.infinity, 50),
                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                 ),
@@ -404,7 +404,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : const Text("Submit Donation", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white)),
+                                    : const Text("Submit Donation", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black)),
                               ),
                             ),
                           ],

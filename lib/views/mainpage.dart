@@ -9,6 +9,7 @@ import 'package:pawpal/models/petservices.dart';
 import 'package:pawpal/myconfig.dart';
 import 'package:pawpal/views/loginscreen.dart';
 import 'package:pawpal/models/user.dart';
+import 'package:pawpal/views/mydonationsscreen.dart';
 import 'package:pawpal/views/submitpetscreen.dart';
 import 'package:pawpal/views/petdetailsscreen.dart';
 import 'package:pawpal/views/profilepage.dart';
@@ -141,7 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     widget.user?.user_id != null &&
                     widget.user?.user_id != '0')
             ? FloatingActionButton.extended(
-                backgroundColor: const Color.fromARGB(255, 242, 194, 121),
+                backgroundColor: const Color.fromRGBO(242, 194, 121, 1),
                 icon: const Icon(Icons.add),
                 label: const Text("Add Pet"),
                 onPressed: () async {
@@ -461,16 +462,26 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       actions: [
-        _buildAppBarIcon(
-          icon: Icons.search,
-          tooltip: "Search",
-          onTap: showSearchDialog,
-        ),
+        // REFRESH ICON
         _buildAppBarIcon(
           icon: Icons.refresh,
           tooltip: "Refresh",
           onTap: () => loadAllPublicPets(),
         ),
+        // MY DONATIONS ICON - Only show if user is logged in
+        if (widget.user != null && widget.user?.user_id != '0')
+          _buildAppBarIcon(
+            icon: Icons.volunteer_activism,
+            tooltip: "My Donations",
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => MyDonationsScreen(user: widget.user),
+                ),
+              );
+            },
+          ),
         if (widget.user != null && widget.user?.user_id != '0')
           _buildAppBarIcon(
             icon: Icons.person,
