@@ -67,7 +67,23 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Pet Service'),
+        title: Text("Pet Services"),
+        foregroundColor: const Color.fromARGB(255, 255, 244, 215),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color.fromARGB(255, 72, 38, 44),
+                Color.fromARGB(255, 120, 60, 70),
+                Color.fromARGB(255, 200, 150, 160),
+              ],
+            ),
+          ),
+        ),
       ),
       body: Center(
         child: Padding(
@@ -250,14 +266,41 @@ class _SubmitpetscreenState extends State<Submitpetscreen> {
                   //SUBMIT BUTTON 
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 72, 38, 44),
+                      padding: EdgeInsets.zero,
+                      backgroundColor: Colors.transparent,
+                      shadowColor: Colors.transparent,
                       minimumSize: Size(width, 50),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
                     ),
                     onPressed: showSubmitDialog,
-                    child: Text("Submit", style: TextStyle(color: Colors.white)),
+                    child: Ink(
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color.fromARGB(255, 72, 38, 44),
+                            Color.fromARGB(255, 120, 60, 70),
+                            Color.fromARGB(255, 200, 150, 160),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Container(
+                        alignment: Alignment.center,
+                        height: 50,
+                        child: const Text(
+                          "Submit Pet",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
-
                 ],
               ),
             ),

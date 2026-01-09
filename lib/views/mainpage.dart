@@ -141,22 +141,44 @@ class _HomeScreenState extends State<HomeScreen> {
         floatingActionButton: (widget.user != null &&
                     widget.user?.user_id != null &&
                     widget.user?.user_id != '0')
-            ? FloatingActionButton.extended(
-                backgroundColor: const Color.fromRGBO(242, 194, 121, 1),
-                icon: const Icon(Icons.add),
-                label: const Text("Add Pet"),
-                onPressed: () async {
-                  var result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          Submitpetscreen(user: widget.user),
+            ? Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      const Color.fromARGB(255, 72, 38, 44),
+                      const Color.fromARGB(255, 120, 60, 70),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color.fromARGB(255, 72, 38, 44).withOpacity(0.4),
+                      blurRadius: 12,
+                      offset: const Offset(0, 6),
                     ),
-                  );
-                  if (result == true) {
-                    loadAllPublicPets();
-                  }
-                },
+                  ],
+                ),
+                child: FloatingActionButton.extended(
+                  backgroundColor: Colors.transparent,
+                  foregroundColor: const Color.fromARGB(255, 255, 244, 215),
+                  elevation: 0,
+                  icon: const Icon(Icons.add),
+                  label: const Text("Add Pet"),
+                  onPressed: () async {
+                    var result = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            Submitpetscreen(user: widget.user),
+                      ),
+                    );
+                    if (result == true) {
+                      loadAllPublicPets();
+                    }
+                  },
+                ),
               )
             : null,
       ),
@@ -440,24 +462,37 @@ class _HomeScreenState extends State<HomeScreen> {
   AppBar buildModernAppBar() {
     return AppBar(
       elevation: 0,
-      backgroundColor: const Color.fromARGB(255, 72, 38, 44),
+      backgroundColor: Colors.transparent,
       foregroundColor: const Color.fromARGB(255, 255, 244, 215),
       titleSpacing: 16,
-      title: Column(
+      flexibleSpace: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              const Color.fromARGB(255, 72, 38, 44),
+              const Color.fromARGB(255, 120, 60, 70),
+              const Color.fromARGB(255, 200, 150, 160),
+            ],
+          ),
+        ),
+      ),
+      title: const Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: const [
+        children: [
           Text(
-            "PawPal",
+            "🐾 PawPal",
             style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w600,
+              fontSize: 22,
+              fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
             ),
           ),
           SizedBox(height: 2),
           Text(
             "Pet Adoption & Donation",
-            style: TextStyle(fontSize: 12, color: Colors.white70),
+            style: TextStyle(fontSize: 11, color: Colors.white70),
           ),
         ],
       ),

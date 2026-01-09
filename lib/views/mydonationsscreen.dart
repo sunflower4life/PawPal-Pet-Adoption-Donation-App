@@ -36,14 +36,32 @@ class _MyDonationsScreenState extends State<MyDonationsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Donations'),
+        foregroundColor: const Color.fromARGB(255, 255, 244, 215),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color.fromARGB(255, 72, 38, 44),
+                Color.fromARGB(255, 120, 60, 70),
+                Color.fromARGB(255, 200, 150, 160),
+              ],
+            ),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
               loadMyDonations();
-            }
-        )],
+            },
+          ),
+        ]
       ),
+      backgroundColor: Colors.grey[50],
       body: Center(
         child: SizedBox(
           width: screenWidth,
@@ -53,32 +71,46 @@ class _MyDonationsScreenState extends State<MyDonationsScreen> {
               if (donationsList.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Card(
-                    elevation: 2,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          const Color.fromARGB(255, 72, 38, 44),
+                          const Color.fromARGB(255, 120, 60, 70),
+                        ],
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color.fromARGB(255, 72, 38, 44).withOpacity(0.3),
+                          blurRadius: 12,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
                     child: Padding(
-                      padding: const EdgeInsets.all(16.0),
+                      padding: const EdgeInsets.all(20.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Column(
-                            children: [
-                              const Text("Total Donations", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                              const SizedBox(height: 8),
-                              Text(
-                                donationsList.length.toString(),
-                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blue),
-                              ),
-                            ],
+                          _buildSummaryItem(
+                            icon: Icons.favorite,
+                            label: "Total Donations",
+                            value: donationsList.length.toString(),
+                            color: Colors.white,
                           ),
-                          Column(
-                            children: [
-                              const Text("Money Donated", style: TextStyle(fontSize: 12, color: Colors.grey)),
-                              const SizedBox(height: 8),
-                              Text(
-                                "RM ${totalDonated.toStringAsFixed(2)}",
-                                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.green),
-                              ),
-                            ],
+                          Container(
+                            width: 1,
+                            height: 60,
+                            color: Colors.white.withOpacity(0.3),
+                          ),
+                          _buildSummaryItem(
+                            icon: Icons.monetization_on,
+                            label: "Money Donated",
+                            value: "RM ${totalDonated.toStringAsFixed(2)}",
+                            color: Colors.amber,
                           ),
                         ],
                       ),
@@ -93,12 +125,23 @@ class _MyDonationsScreenState extends State<MyDonationsScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(Icons.favorite_border, size: 64, color: Colors.grey),
-                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.grey[200],
+                              ),
+                              child: Icon(Icons.favorite_border, size: 64, color: Colors.grey[400]),
+                            ),
+                            const SizedBox(height: 16),
                             Text(
                               status,
                               textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 16, color: Colors.grey),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ],
                         ),
@@ -106,78 +149,11 @@ class _MyDonationsScreenState extends State<MyDonationsScreen> {
                     )
                   : Expanded(
                       child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         itemCount: donationsList.length,
                         itemBuilder: (context, index) {
                           var donation = donationsList[index];
-                          return Card(
-                            margin: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  // PET NAME AND DONATION TYPE
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          donation['pet_name'] ?? "Unknown",
-                                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ),
-                                      Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                        decoration: BoxDecoration(
-                                          color: getDonationTypeColor(donation['donation_type']).withOpacity(0.2),
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
-                                        child: Text(
-                                          donation['donation_type'] ?? "",
-                                          style: TextStyle(
-                                            fontSize: 11,
-                                            fontWeight: FontWeight.bold,
-                                            color: getDonationTypeColor(donation['donation_type']),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-
-                                  const SizedBox(height: 8),
-
-                                  // DONATION DETAILS
-                                  if (donation['donation_type'] == 'Money')
-                                    Text(
-                                      "Amount: RM ${donation['amount'] ?? '0'}",
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.green,
-                                      ),
-                                    )
-                                  else
-                                    Text(
-                                      donation['description'] ?? "",
-                                      style: const TextStyle(fontSize: 13, color: Colors.black87),
-                                      maxLines: 2,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-
-                                  const SizedBox(height: 8),
-
-                                  // DATE
-                                  Text(
-                                    "Donated: ${donation['created_at'] ?? ''}",
-                                    style: const TextStyle(fontSize: 11, color: Colors.grey),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
+                          return _buildDonationCard(donation);
                         },
                       ),
                     ),
@@ -188,7 +164,185 @@ class _MyDonationsScreenState extends State<MyDonationsScreen> {
     );
   }
 
-  // LOAD MY DONATIONS
+  Widget _buildSummaryItem({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color color,
+  }) {
+    return Column(
+      children: [
+        Icon(icon, size: 32, color: color),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.white.withOpacity(0.8),
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDonationCard(Map<String, dynamic> donation) {
+    String donationType = donation['donation_type'] ?? "";
+    Color typeColor = getDonationTypeColor(donationType);
+
+    return Card(
+      elevation: 2,
+      margin: const EdgeInsets.symmetric(vertical: 8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(14.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // HEADER ROW
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          donation['pet_name'] ?? "Unknown Pet",
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromARGB(255, 72, 38, 44),
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          "Donated on ${donation['created_at'] ?? ''}",
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: typeColor.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      donationType,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: typeColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+
+              // DONATION DETAILS
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[50],
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: typeColor.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        _getDonationIcon(donationType),
+                        color: typeColor,
+                        size: 20,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            donationType == 'Money' ? 'Amount Donated' : 'Description',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey[600],
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          if (donationType == 'Money')
+                            Text(
+                              "RM ${donation['amount'] ?? '0'}",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: typeColor,
+                              ),
+                            )
+                          else
+                            Text(
+                              donation['description'] ?? "No description",
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: Colors.black87,
+                                height: 1.4,
+                              ),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _getDonationIcon(String type) {
+    switch (type) {
+      case "Food":
+        return Icons.fastfood;
+      case "Medical":
+        return Icons.local_hospital;
+      case "Money":
+        return Icons.monetization_on;
+      default:
+        return Icons.favorite;
+    }
+  }
+
   void loadMyDonations() {
     if (widget.user?.user_id == null || widget.user?.user_id == '0') {
       setState(() {
@@ -218,7 +372,6 @@ class _MyDonationsScreenState extends State<MyDonationsScreen> {
                 for (var item in jsonResponse['data']) {
                   donationsList.add(item);
 
-                  // Calculate total money donated
                   if (item['donation_type'] == 'Money' && item['amount'] != null) {
                     totalDonated += double.tryParse(item['amount'].toString()) ?? 0;
                   }
@@ -240,7 +393,6 @@ class _MyDonationsScreenState extends State<MyDonationsScreen> {
         });
   }
 
-  // GET DONATION TYPE COLOR
   Color getDonationTypeColor(String? type) {
     switch (type) {
       case "Food":

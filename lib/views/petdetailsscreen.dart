@@ -24,11 +24,9 @@ class PetDetailsScreen extends StatefulWidget {
 class _PetDetailsScreenState extends State<PetDetailsScreen> {
   late double screenWidth, screenHeight;
   
-  // Adoption form
   TextEditingController motivationController = TextEditingController();
   bool isSubmittingRequest = false;
 
-  // Donation form
   String donationType = 'Food';
   List<String> donationTypes = ['Food', 'Medical', 'Money'];
   TextEditingController donationAmountController = TextEditingController();
@@ -48,7 +46,25 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.pet.petName ?? "Pet Details"),
+        foregroundColor: const Color.fromARGB(255, 255, 244, 215),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color.fromARGB(255, 72, 38, 44),
+                Color.fromARGB(255, 120, 60, 70),
+                Color.fromARGB(255, 200, 150, 160),
+              ],
+            ),
+          ),
+        ),
       ),
+
+      backgroundColor: Colors.grey[50],
       body: SingleChildScrollView(
         child: Center(
           child: SizedBox(
@@ -56,19 +72,41 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // PET IMAGE
+                // PET IMAGE WITH GRADIENT OVERLAY
                 if (firstImageUrl != null)
-                  Container(
-                    width: screenWidth,
-                    height: 300,
-                    color: Colors.grey[200],
-                    child: Image.network(
-                      firstImageUrl,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(Icons.pets, size: 100, color: Colors.grey);
-                      },
-                    ),
+                  Stack(
+                    children: [
+                      Container(
+                        width: screenWidth,
+                        height: 300,
+                        color: Colors.grey[200],
+                        child: Image.network(
+                          firstImageUrl,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(Icons.pets, size: 100, color: Colors.grey);
+                          },
+                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        child: Container(
+                          height: 80,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                Colors.transparent,
+                                Colors.black.withOpacity(0.3),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
 
                 Padding(
@@ -76,118 +114,83 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // PET NAME
-                      Text(
-                        widget.pet.petName ?? "Unknown",
-                        style: const TextStyle(
-                          fontSize: 28,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      // PET NAME & CATEGORY
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              widget.pet.petName ?? "Unknown",
+                              style: const TextStyle(
+                                fontSize: 28,
+                                fontWeight: FontWeight.bold,
+                                color: Color.fromARGB(255, 72, 38, 44),
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: getCategoryColor(widget.pet.category).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              widget.pet.category ?? "Unknown",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: getCategoryColor(widget.pet.category),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
 
-                      const SizedBox(height: 16),
+                      const SizedBox(height: 20),
 
                       // PET DETAILS CARD
-                      Card(
-                        elevation: 2,
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.08),
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
                           child: Column(
                             children: [
-                              // Type
-                              Row(
-                                children: [
-                                  Icon(Icons.pets, color: Colors.blue),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("Type", 
-                                      style: TextStyle(
-                                        fontSize: 12, 
-                                        color: Colors.grey
-                                      )),
-                                      Text(widget.pet.petType ?? "Unknown", 
-                                      style: const TextStyle(
-                                        fontSize: 16, 
-                                        fontWeight: FontWeight.bold
-                                      )),
-                                    ],
-                                  ),
-                                ],
+                              _buildDetailRow(
+                                icon: Icons.pets,
+                                label: "Type",
+                                value: widget.pet.petType ?? "Unknown",
+                                iconColor: Colors.blue,
                               ),
-                              const SizedBox(height: 16),
-
-                              // Age
-                              Row(
-                                children: [
-                                  Icon(Icons.calendar_today, color: Colors.orange),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("Age", 
-                                      style: TextStyle(
-                                        fontSize: 12, 
-                                        color: Colors.grey
-                                      )),
-                                      Text("${widget.pet.petAge ?? '0'} years old", 
-                                      style: const TextStyle(
-                                        fontSize: 16, 
-                                        fontWeight: FontWeight.bold
-                                      )),
-                                    ],
-                                  ),
-                                ],
+                              const Divider(height: 20),
+                              _buildDetailRow(
+                                icon: Icons.calendar_today,
+                                label: "Age",
+                                value: "${widget.pet.petAge ?? '0'} years old",
+                                iconColor: Colors.orange,
                               ),
-                              const SizedBox(height: 16),
-
-                              // Gender
-                              Row(
-                                children: [
-                                  Icon(widget.pet.petGender == "Male" ? Icons.male : Icons.female,
-                                      color: widget.pet.petGender == "Male" ? Colors.blue : Colors.pink),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("Gender", 
-                                      style: TextStyle(
-                                        fontSize: 12, 
-                                        color: Colors.grey
-                                      )),
-                                      Text(widget.pet.petGender ?? "Unknown", 
-                                      style: const TextStyle(
-                                        fontSize: 16, 
-                                        fontWeight: FontWeight.bold
-                                      )),
-                                    ],
-                                  ),
-                                ],
+                              const Divider(height: 20),
+                              _buildDetailRow(
+                                icon: widget.pet.petGender == "Male" ? Icons.male : Icons.female,
+                                label: "Gender",
+                                value: widget.pet.petGender ?? "Unknown",
+                                iconColor: widget.pet.petGender == "Male" ? Colors.blue : Colors.pink,
                               ),
-                              const SizedBox(height: 16),
-
-                              // Health
-                              Row(
-                                children: [
-                                  Icon(Icons.favorite, color: getHealthColor(widget.pet.petHealth)),
-                                  const SizedBox(width: 12),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      const Text("Health Status", 
-                                      style: TextStyle(
-                                        fontSize: 12, 
-                                        color: Colors.grey
-                                      )),
-                                      Text(widget.pet.petHealth ?? "Unknown", 
-                                      style: const TextStyle(
-                                        fontSize: 16, 
-                                        fontWeight: FontWeight.bold
-                                      )),
-                                    ],
-                                  ),
-                                ],
+                              const Divider(height: 20),
+                              _buildDetailRow(
+                                icon: Icons.favorite,
+                                label: "Health Status",
+                                value: widget.pet.petHealth ?? "Unknown",
+                                iconColor: getHealthColor(widget.pet.petHealth),
                               ),
                             ],
                           ),
@@ -196,38 +199,30 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
 
                       const SizedBox(height: 20),
 
-                      // CATEGORY BADGE
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(
-                          color: getCategoryColor(widget.pet.category).withOpacity(0.2),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          widget.pet.category ?? "Unknown",
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: getCategoryColor(widget.pet.category),
-                          ),
+                      // DESCRIPTION
+                      Text(
+                        "About",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[800],
                         ),
                       ),
-
-                      const SizedBox(height: 20),
-
-                      // DESCRIPTION
-                      const Text("Description", 
-                      style: TextStyle(
-                        fontSize: 18, 
-                        fontWeight: FontWeight.bold
-                      )),
                       const SizedBox(height: 8),
-                      Text(
-                        widget.pet.description ?? "No description",
-                        style: const TextStyle(
-                          fontSize: 14, 
-                          color: Colors.black87, 
-                          height: 1.5
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey[200]!),
+                        ),
+                        child: Text(
+                          widget.pet.description ?? "No description",
+                          style: TextStyle(
+                            fontSize: 14,
+                            color: Colors.grey[700],
+                            height: 1.6,
+                          ),
                         ),
                       ),
 
@@ -238,40 +233,66 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text("Location", 
-                            style: TextStyle(
-                              fontSize: 18, 
-                              fontWeight: FontWeight.bold
-                            )),
+                            Text(
+                              "Location",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[800],
+                              ),
+                            ),
                             const SizedBox(height: 8),
-                            Text("Lat: ${widget.pet.lat}, Lng: ${widget.pet.lng}", 
-                            style: const TextStyle(
-                              fontSize: 14, 
-                              color: Colors.black87
-                            )),
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(color: Colors.grey[200]!),
+                              ),
+                              child: Row(
+                                children: [
+                                  const Icon(Icons.location_on, color: Color.fromARGB(255, 72, 38, 44)),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      "Lat: ${widget.pet.lat}, Lng: ${widget.pet.lng}",
+                                      style: TextStyle(fontSize: 13, color: Colors.grey[700]),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                             const SizedBox(height: 20),
                           ],
                         ),
 
                       // POSTED BY
-                      Card(
-                        color: Colors.grey[50],
-                        child: Padding(
-                          padding: const EdgeInsets.all(12.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text("Posted By", 
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey[50],
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.grey[200]!),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Posted By",
                               style: TextStyle(
-                                fontWeight: FontWeight.bold, 
-                                fontSize: 14
-                              )),
-                              const SizedBox(height: 8),
-                              if (widget.pet.userName != null) Text("Name: ${widget.pet.userName}"),
-                              if (widget.pet.userEmail != null) Text("Email: ${widget.pet.userEmail}"),
-                              if (widget.pet.userPhone != null) Text("Phone: ${widget.pet.userPhone}"),
-                            ],
-                          ),
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: Colors.grey[800],
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            if (widget.pet.userName != null)
+                              Text("${widget.pet.userName}", style: TextStyle(color: Colors.grey[700])),
+                            if (widget.pet.userEmail != null)
+                              Text("${widget.pet.userEmail}", style: TextStyle(color: Colors.grey[700])),
+                            if (widget.pet.userPhone != null)
+                              Text("${widget.pet.userPhone}", style: TextStyle(color: Colors.grey[700])),
+                          ],
                         ),
                       ),
 
@@ -279,136 +300,11 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
 
                       // ADOPTION FORM
                       if (widget.pet.category == "Adoption")
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Request to Adopt", 
-                            style: TextStyle(
-                              fontSize: 20, 
-                              fontWeight: FontWeight.bold
-                            )),
-                            const SizedBox(height: 12),
-                            TextField(
-                              controller: motivationController,
-                              maxLines: 4,
-                              decoration: InputDecoration(
-                                hintText: "Share your motivation for adopting...",
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                contentPadding: const EdgeInsets.all(12),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color.fromARGB(255, 76, 175, 80),
-                                  minimumSize: const Size(double.infinity, 50),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                                onPressed: isSubmittingRequest ? null : submitAdoptionRequest,
-                                child: isSubmittingRequest
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : const Text("Submit Adoption Request", 
-                                    style: TextStyle(
-                                      fontSize: 16, 
-                                      fontWeight: FontWeight.bold, 
-                                      color: Colors.white
-                                    )),
-                              ),
-                            ),
-                          ],
-                        ),
-
-                      const SizedBox(height: 30),
+                        _buildAdoptionForm(),
 
                       // DONATION FORM
                       if (widget.pet.category == "Donation Request" || widget.pet.category == "Help/Rescue")
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text("Make a Donation", 
-                            style: TextStyle(
-                              fontSize: 20, 
-                              fontWeight: FontWeight.bold
-                            )),
-                            const SizedBox(height: 12),
-
-                            DropdownButtonFormField<String>(
-                              value: donationType,
-                              decoration: InputDecoration(
-                                labelText: 'Donation Type',
-                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                              items: donationTypes.map((String value) {
-                                return DropdownMenuItem<String>(value: value, child: Text(value));
-                              }).toList(),
-                              onChanged: (value) {
-                                setState(() {
-                                  donationType = value ?? 'Food';
-                                  donationAmountController.clear();
-                                  donationDescriptionController.clear();
-                                });
-                              },
-                            ),
-
-                            const SizedBox(height: 12),
-
-                            if (donationType == 'Money')
-                              TextField(
-                                controller: donationAmountController,
-                                keyboardType: TextInputType.number,
-                                decoration: InputDecoration(
-                                  labelText: 'Amount (RM)',
-                                  hintText: 'Enter donation amount',
-                                  prefixText: 'RM ',
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                              )
-                            else
-                              TextField(
-                                controller: donationDescriptionController,
-                                maxLines: 3,
-                                decoration: InputDecoration(
-                                  labelText: 'Description',
-                                  hintText: 'Describe what you are donating...',
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                                  contentPadding: const EdgeInsets.all(12),
-                                ),
-                              ),
-
-                            const SizedBox(height: 16),
-
-                            SizedBox(
-                              width: double.infinity,
-                              child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: const Color.fromRGBO(242, 194, 121, 1),
-                                  minimumSize: const Size(double.infinity, 50),
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                                ),
-                                onPressed: isSubmittingDonation ? null : submitDonation,
-                                child: isSubmittingDonation
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : const Text("Submit Donation", style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black)),
-                              ),
-                            ),
-                          ],
-                        ),
+                        _buildDonationForm(),
 
                       const SizedBox(height: 30),
                     ],
@@ -422,7 +318,246 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
     );
   }
 
-  // GET FIRST IMAGE
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+    required Color iconColor,
+  }) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: iconColor.withOpacity(0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: iconColor, size: 20),
+        ),
+        const SizedBox(width: 12),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAdoptionForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Request to Adopt",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 72, 38, 44),
+          ),
+        ),
+        const SizedBox(height: 12),
+        TextField(
+          controller: motivationController,
+          maxLines: 4,
+          decoration: InputDecoration(
+            hintText: "Share your motivation for adopting...",
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(color: Colors.grey[300]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color.fromARGB(255, 72, 38, 44),
+                width: 2,
+              ),
+            ),
+            filled: true,
+            fillColor: Colors.white,
+            contentPadding: const EdgeInsets.all(12),
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: isSubmittingRequest ? null : submitAdoptionRequest,
+            child: isSubmittingRequest
+                ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 2,
+                    ),
+                  )
+                : const Text(
+                    "Submit Adoption Request",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDonationForm() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Make a Donation",
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Color.fromARGB(255, 72, 38, 44),
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            child: DropdownButton<String>(
+              value: donationType,
+              isExpanded: true,
+              underline: SizedBox(),
+              items: donationTypes.map((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+              onChanged: (value) {
+                setState(() {
+                  donationType = value ?? 'Food';
+                  donationAmountController.clear();
+                  donationDescriptionController.clear();
+                });
+              },
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        if (donationType == 'Money')
+          TextField(
+            controller: donationAmountController,
+            keyboardType: TextInputType.number,
+            decoration: InputDecoration(
+              labelText: 'Amount (RM)',
+              hintText: 'Enter donation amount',
+              prefixText: 'RM ',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+            ),
+          )
+        else
+          TextField(
+            controller: donationDescriptionController,
+            maxLines: 3,
+            decoration: InputDecoration(
+              labelText: 'Description',
+              hintText: 'Describe what you are donating...',
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(color: Colors.grey[300]!),
+              ),
+              filled: true,
+              fillColor: Colors.white,
+              contentPadding: const EdgeInsets.all(12),
+            ),
+          ),
+        const SizedBox(height: 16),
+          SizedBox(
+          width: double.infinity,
+          height: 50,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.zero, // IMPORTANT
+              backgroundColor: Colors.transparent,
+              shadowColor: Colors.transparent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: isSubmittingDonation ? null : submitDonation,
+            child: Ink(
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Color.fromARGB(255, 72, 38, 44),
+                    Color.fromARGB(255, 120, 60, 70),
+                    Color.fromARGB(255, 200, 150, 160),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Container(
+                alignment: Alignment.center,
+                child: isSubmittingDonation
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : const Text(
+                        "Submit Donation",
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: const Color.fromARGB(255, 255, 244, 215),
+                        ),
+                      ),
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   String? getFirstImageUrl(PetService pet) {
     if (pet.imagePaths == null || pet.imagePaths!.isEmpty) {
       return null;
@@ -455,7 +590,6 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
     return null;
   }
 
-  // GET HEALTH COLOR
   Color getHealthColor(String? health) {
     switch (health) {
       case "Healthy":
@@ -469,7 +603,6 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
     }
   }
 
-  // GET CATEGORY COLOR
   Color getCategoryColor(String? category) {
     switch (category) {
       case "Adoption":
@@ -483,7 +616,6 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
     }
   }
 
-  // SUBMIT ADOPTION REQUEST
   void submitAdoptionRequest() {
     if (widget.user == null || widget.user?.user_id == null || widget.user?.user_id == '0') {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -509,16 +641,18 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text("Submit Adoption Request"),
-        content: Text("Are you sure?"),
+        content: const Text("Are you sure?"),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
             onPressed: () {
               Navigator.pop(context);
               submitAdoptionToAPI();
             },
-            child: const Text("Submit"),
+            child: const Text("Submit", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -572,7 +706,6 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
     });
   }
 
-  // SUBMIT DONATION
   void submitDonation() {
     if (widget.user == null || widget.user?.user_id == null || widget.user?.user_id == '0') {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -614,16 +747,18 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text("Confirm Donation"),
-        content: Text("Are you sure?"),
+        content: const Text("Are you sure?"),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
-          TextButton(
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: const Color.fromARGB(255, 72, 38, 44)),
             onPressed: () {
               Navigator.pop(context);
               submitDonationToAPI();
             },
-            child: const Text("Confirm"),
+            child: const Text("Confirm", style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -631,94 +766,92 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
   }
 
   void submitDonationToAPI() {
-  setState(() {
-    isSubmittingDonation = true;
-  });
+    setState(() {
+      isSubmittingDonation = true;
+    });
 
-  String amount = '';
-  String description = '';
+    String amount = '';
+    String description = '';
 
-  if (donationType == 'Money') {
-    amount = donationAmountController.text.trim();
-  } else {
-    description = donationDescriptionController.text.trim();
-  }
+    if (donationType == 'Money') {
+      amount = donationAmountController.text.trim();
+    } else {
+      description = donationDescriptionController.text.trim();
+    }
 
-  http
-      .post(
-        Uri.parse('${MyConfig.baseUrl}/pawpal/api/submit_donation.php'),
-        body: {
-          "user_id": widget.user!.user_id.toString(),
-          "pet_id": widget.pet.petId.toString(),
-          "donation_type": donationType,
-          "amount": amount,
-          "description": description,
-        },
-      )
-      .then((response) {
-        print("Response: ${response.body}");
+    http
+        .post(
+          Uri.parse('${MyConfig.baseUrl}/pawpal/api/submit_donation.php'),
+          body: {
+            "user_id": widget.user!.user_id.toString(),
+            "pet_id": widget.pet.petId.toString(),
+            "donation_type": donationType,
+            "amount": amount,
+            "description": description,
+          },
+        )
+        .then((response) {
+          print("Response: ${response.body}");
 
-        setState(() {
-          isSubmittingDonation = false;
-        });
+          setState(() {
+            isSubmittingDonation = false;
+          });
 
-        if (response.statusCode == 200) {
-          var res = jsonDecode(response.body);
+          if (response.statusCode == 200) {
+            var res = jsonDecode(response.body);
 
-          if (res['status'] == true) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Donation submitted successfully!"),
-                backgroundColor: Colors.green,
-              ),
-            );
-
-            // If Money donation, navigate to payment gateway
-            if (donationType == 'Money') {
-              double donationAmount = double.parse(amount);
-              int petIdInt = int.parse(widget.pet.petId ?? '0');
-              
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => DonationPaymentPage(
-                    user: widget.user!,
-                    amount: donationAmount,
-                    petId: petIdInt,
-                    petName: widget.pet.petName ?? "Pet",
-                  ),
+            if (res['status'] == true) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text("Donation submitted successfully!"),
+                  backgroundColor: Colors.green,
                 ),
               );
+
+              if (donationType == 'Money') {
+                double donationAmount = double.parse(amount);
+                int petIdInt = int.parse(widget.pet.petId ?? '0');
+                
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => DonationPaymentPage(
+                      user: widget.user!,
+                      amount: donationAmount,
+                      petId: petIdInt,
+                      petName: widget.pet.petName ?? "Pet",
+                    ),
+                  ),
+                );
+              } else {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyDonationsScreen(user: widget.user),
+                  ),
+                );
+              }
             } else {
-              // If Food or Medical donation, navigate to My Donations
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => MyDonationsScreen(user: widget.user),
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(res['message'] ?? "Failed"),
+                  backgroundColor: Colors.red,
                 ),
               );
             }
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(res['message'] ?? "Failed"),
-                backgroundColor: Colors.red,
-              ),
-            );
           }
-        }
-      })
-      .catchError((error) {
-        setState(() {
-          isSubmittingDonation = false;
-        });
+        })
+        .catchError((error) {
+          setState(() {
+            isSubmittingDonation = false;
+          });
 
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Error: $error"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      });
-}
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Error: $error"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        });
+  }
 }
