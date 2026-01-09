@@ -37,7 +37,7 @@ class _ProfilePageState extends State<ProfilePage> {
     emailController.text = widget.user.email ?? '';
   }
 
-  // ================= PICK PROFILE IMAGE FROM GALLERY =================
+  //PICK PROFILE IMAGE FROM GALLERY 
   Future<void> _pickProfileImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -49,7 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  // ================= UPDATE PROFILE =================
+  //UPDATE PROFILE
   Future<void> _updateProfile() async {
     if (nameController.text.isEmpty || phoneController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -106,7 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => isLoading = false);
   }
 
-  // ================= UI =================
+  //UI
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width > 500
@@ -114,24 +114,32 @@ class _ProfilePageState extends State<ProfilePage> {
         : MediaQuery.of(context).size.width;
 
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: const Color.fromARGB(255, 72, 38, 44),
+        title: const Text('My Donations'),
         foregroundColor: const Color.fromARGB(255, 255, 244, 215),
-        titleSpacing: 16,
-        title: const Text(
-          "My Profile",
-          style: TextStyle(fontWeight: FontWeight.bold),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color.fromARGB(255, 72, 38, 44),
+                Color.fromARGB(255, 120, 60, 70),
+                Color.fromARGB(255, 200, 150, 160),
+              ],
+            ),
+          ),
         ),
         actions: [
           IconButton(
+            icon: const Icon(Icons.refresh),
             onPressed: () {
               loadProfile();
             },
-            icon: const Icon(Icons.refresh),
           ),
-        ],
+        ]
       ),
       body: Stack(
         children: [
@@ -149,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        // ========== PROFILE IMAGE AVATAR ==========
+                        //PROFILE IMAGE AVATAR
                         GestureDetector(
                           onTap: _pickProfileImage,
                           child: CircleAvatar(
@@ -193,7 +201,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
                         const SizedBox(height: 20),
 
-                        // ========== READONLY FIELDS ==========
+                        //READONLY FIELDS 
                         _readonlyField("User ID", widget.user.user_id),
                         _readonlyField("Email", widget.user.email),
                         _readonlyField(
@@ -208,7 +216,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         const Divider(height: 30),
                         const SizedBox(height: 8),
 
-                        // ========== EDITABLE FIELDS ==========
+                        //EDITABLE FIELDS
                         _inputField(
                           controller: nameController,
                           label: "Name",
@@ -227,24 +235,43 @@ class _ProfilePageState extends State<ProfilePage> {
 
                         const SizedBox(height: 20),
 
-                        // ========== SAVE BUTTON ==========
+                        //SAVE BUTTON 
                         SizedBox(
                           width: double.infinity,
-                          height: 48,
+                          height: 50,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 72, 38, 44),
+                              padding: EdgeInsets.zero, // IMPORTANT
+                              backgroundColor: Colors.transparent,
+                              shadowColor: Colors.transparent,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
                             onPressed: _updateProfile,
-                            child: const Text(
-                              "Save Changes",
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
+                            child: Ink(
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [
+                                    const Color.fromARGB(255, 72, 38, 44),
+                                    const Color.fromARGB(255, 120, 60, 70),
+                                    const Color.fromARGB(255, 200, 150, 160),
+                                  ],
+                                  begin: Alignment.centerLeft,
+                                  end: Alignment.centerRight,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Container(
+                                alignment: Alignment.center,
+                                child: const Text(
+                                  "Save Changes",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -257,7 +284,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
           ),
 
-          // ========== LOADING OVERLAY ==========
+          // LOADING OVERLAY 
           if (isLoading)
             Container(
               color: Colors.black.withOpacity(0.3),
@@ -268,7 +295,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // ================= HELPER WIDGETS =================
+  //  HELPER WIDGETS 
   Widget _readonlyField(String label, String? value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),

@@ -145,9 +145,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                           ),
                         ],
                       ),
-
                       const SizedBox(height: 20),
-
                       // PET DETAILS CARD
                       Container(
                         decoration: BoxDecoration(
@@ -196,9 +194,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 20),
-
                       // DESCRIPTION
                       Text(
                         "About",
@@ -225,9 +221,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                           ),
                         ),
                       ),
-
                       const SizedBox(height: 20),
-
                       // LOCATION
                       if (widget.pet.lat != null && widget.pet.lng != null)
                         Column(
@@ -265,7 +259,6 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                             const SizedBox(height: 20),
                           ],
                         ),
-
                       // POSTED BY
                       Container(
                         padding: const EdgeInsets.all(12),
@@ -295,7 +288,6 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
                           ],
                         ),
                       ),
-
                       const SizedBox(height: 30),
 
                       // ADOPTION FORM
@@ -586,7 +578,6 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
         print("Error parsing image paths: $e2");
       }
     }
-
     return null;
   }
 
@@ -713,7 +704,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
       );
       return;
     }
-
+    //
     if (donationType == 'Money') {
       if (donationAmountController.text.trim().isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -778,7 +769,6 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
     } else {
       description = donationDescriptionController.text.trim();
     }
-
     http
         .post(
           Uri.parse('${MyConfig.baseUrl}/pawpal/api/submit_donation.php'),

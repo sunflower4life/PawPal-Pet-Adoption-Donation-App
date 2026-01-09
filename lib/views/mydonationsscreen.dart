@@ -259,7 +259,6 @@ class _MyDonationsScreenState extends State<MyDonationsScreen> {
                   ),
                 ],
               ),
-
               const SizedBox(height: 12),
 
               // DONATION DETAILS
@@ -351,7 +350,6 @@ class _MyDonationsScreenState extends State<MyDonationsScreen> {
       });
       return;
     }
-
     http
         .get(
           Uri.parse(
@@ -376,7 +374,6 @@ class _MyDonationsScreenState extends State<MyDonationsScreen> {
                     totalDonated += double.tryParse(item['amount'].toString()) ?? 0;
                   }
                 }
-
                 status = donationsList.isEmpty ? "No donations yet" : "";
               });
             } else {

@@ -60,11 +60,8 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.grey.shade100,
-
-        // ────────────────── APP BAR ──────────────────
+        //APP BAR 
         appBar: buildModernAppBar(),
-
-        // ────────────────── BODY ──────────────────
         body: Center(
           child: SizedBox(
             width: contentWidth,
@@ -123,9 +120,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 10),
-
                 // PET LIST
                 Expanded(
                   child: allPets.isEmpty
@@ -136,8 +131,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-
-        // ────────────────── FAB ──────────────────
         floatingActionButton: (widget.user != null &&
                     widget.user?.user_id != null &&
                     widget.user?.user_id != '0')
@@ -191,7 +184,6 @@ class _HomeScreenState extends State<HomeScreen> {
       itemCount: filteredPets.length,
       itemBuilder: (context, index) {
         String? firstImageUrl = getFirstImageUrl(filteredPets[index]);
-
         return Card(
           elevation: 3,
           margin: const EdgeInsets.symmetric(vertical: 6),
@@ -233,7 +225,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
 
                   const SizedBox(width: 12),
-
                   // TEXT DETAILS
                   Expanded(
                     child: Column(
@@ -251,7 +242,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
 
                         const SizedBox(height: 4),
-
                         // PET TYPE
                         Text(
                           "Type: ${filteredPets[index].petType.toString()}",
@@ -262,7 +252,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
 
                         const SizedBox(height: 4),
-
                         // PET AGE
                         Text(
                           "Age: ${filteredPets[index].petAge.toString()}",
@@ -273,8 +262,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
 
                         const SizedBox(height: 6),
-
-                        // CATEGORY BADGE
+                        // CATEGORY COLOR LABEL
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -385,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> {
         });
   }
 
-  // Apply search and filter
+  // Apply search bar dekat ats 
   void applyFiltersAndSearch() {
     setState(() {
       filteredPets = allPets.where((pet) {
@@ -482,7 +470,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "🐾 PawPal",
+            "PawPal",
             style: TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,
@@ -604,7 +592,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     _performSearch(value);
                   },
                   decoration: InputDecoration(
-                    hintText: "e.g. Fluffy, Max, Bella",
+                    hintText: "e.g. Kitty, Mochi, Rabitty",
                     prefixIcon: const Icon(Icons.search),
                     filled: true,
                     fillColor: Colors.grey.shade100,

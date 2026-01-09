@@ -45,7 +45,6 @@ class _DonationPaymentPageState extends State<DonationPaymentPage> {
     print("Payment URL: $paymentUrl");
 
     if (kIsWeb) {
-      // 🔥 FLUTTER WEB → redirect browser
       launchUrl(
         Uri.parse(paymentUrl),
         mode: LaunchMode.platformDefault,
@@ -63,7 +62,6 @@ class _DonationPaymentPageState extends State<DonationPaymentPage> {
         });
       });
     } else {
-      // 📱 MOBILE → use WebView
       _webcontroller = WebViewController()
         ..setJavaScriptMode(JavaScriptMode.unrestricted)
         ..setNavigationDelegate(

@@ -433,7 +433,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => Center(
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         child: Container(
           padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
