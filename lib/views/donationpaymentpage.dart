@@ -26,120 +26,61 @@ class DonationPaymentPage extends StatefulWidget {
 
 class _DonationPaymentPageState extends State<DonationPaymentPage> {
   late WebViewController _webcontroller;
+  late String userEmail, userPhone, userName, userID;
   bool _isWebPlatform = false;
 
   @override
   void initState() {
-    super.initState();
+    // Extract user data from widget
+    userEmail = widget.user.email ?? '';
+    userPhone = widget.user.phone ?? '';
+    userName = widget.user.name ?? '';
+    userID = widget.user.user_id.toString();
     _isWebPlatform = kIsWeb;
+    super.initState();
 
-    String paymentUrl = '${MyConfig.baseUrl}/pawpal/api/donation_payment.php?'
-        'email=${Uri.encodeComponent(widget.user.email ?? '')}&'
-        'phone=${Uri.encodeComponent(widget.user.phone ?? '')}&'
-        'user_id=${widget.user.user_id}&'
-        'name=${Uri.encodeComponent(widget.user.name ?? '')}&'
-        'amount=${widget.amount}&'
-        'pet_id=${widget.petId}&'
-        'pet_name=${Uri.encodeComponent(widget.petName)}';
-
-    print("Payment URL: $paymentUrl");
-
-    if (kIsWeb) {
-      launchUrl(
-        Uri.parse(paymentUrl),
-        mode: LaunchMode.platformDefault,
-      ).then((_) {
-        // After payment, navigate to My Donations
-        Future.delayed(const Duration(seconds: 3), () {
-          if (mounted) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MyDonationsScreen(user: widget.user),
-              ),
-            );
-          }
-        });
-      });
-    } else {
-      _webcontroller = WebViewController()
-        ..setJavaScriptMode(JavaScriptMode.unrestricted)
-        ..setNavigationDelegate(
-          NavigationDelegate(
-            onPageStarted: (url) {
-              print("WebView loading: $url");
-            },
-            onPageFinished: (url) {
-              print("WebView finished: $url");
-              
-              // Check if we're on the success page
-              if (url.contains('donation_update.php')) {
-                print("Payment page detected, waiting for completion...");
-                
-                // After 4 seconds, navigate to My Donations
-                // (gives time for the success page to show)
-                Future.delayed(const Duration(seconds: 4), () {
-                  if (mounted) {
-                    print("Navigating to My Donations...");
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            MyDonationsScreen(user: widget.user),
-                      ),
-                    );
-                  }
-                });
-              }
-            },
-            onWebResourceError: (error) {
-              print("WebView error: ${error.description}");
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text("Error: ${error.description}"),
-                  backgroundColor: Colors.red,
-                ),
-              );
-            },
-          ),
-        )
-        ..loadRequest(Uri.parse(paymentUrl));
-    }
+    _webcontroller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(
+        NavigationDelegate(
+          // Handle page finished loading
+          onPageFinished: (url) {
+            // Check if payment update page is loaded
+            if (url.contains('donation_update.php')) {
+              // Wait 4 seconds for success page to display
+              Future.delayed(const Duration(seconds: 4), () {
+                if (mounted) {
+                  // Navigate to donations list
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          MyDonationsScreen(user: widget.user),
+                    ),
+                  );
+                }
+              });
+            }
+          },
+        ),
+      )
+      // Load payment gateway URL
+      ..loadRequest(
+        Uri.parse(
+          '${MyConfig.baseUrl}/pawpal/api/donation_payment.php?email=$userEmail&phone=$userPhone&user_id=$userID&name=$userName&amount=${widget.amount}&pet_id=${widget.petId}&pet_name=${widget.petName}',
+        ),
+      );
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isWebPlatform) {
-      return Scaffold(
-        appBar: AppBar(
-          title: const Text("Donation Payment"),
-          backgroundColor: const Color.fromARGB(255, 72, 38, 44),
-          foregroundColor: const Color.fromARGB(255, 255, 244, 215),
-        ),
-        body: const Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 20),
-              Text("Opening payment gateway..."),
-              SizedBox(height: 10),
-              Text(
-                "You will be redirected back after payment",
-                style: TextStyle(color: Colors.grey),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
     return Scaffold(
       appBar: AppBar(
         title: const Text("Donation Payment"),
         backgroundColor: const Color.fromARGB(255, 72, 38, 44),
         foregroundColor: const Color.fromARGB(255, 255, 244, 215),
       ),
+      // Display payment gateway in WebView
       body: WebViewWidget(controller: _webcontroller),
     );
   }
