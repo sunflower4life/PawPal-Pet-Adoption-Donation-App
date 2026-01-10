@@ -25,32 +25,28 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  List<PetService> allPets = [];
+  List<PetService> filteredPets = [];
+  String status = "Loading...";
+  DateFormat formatter = DateFormat('dd/MM/yyyy hh:mm a');
   late double screenWidth, screenHeight;
-  late List<PetService> allPets;
-  late List<PetService> filteredPets;
-  late String status;
-  late DateFormat formatter;
-  late String selectedTypeFilter;
-  late List<String> petTypeFilter;
-  late TextEditingController searchController;
   int numofpage = 1;
   int curpage = 1;
   int numofresult = 0;
   var color;
 
+  // Filter variables
+  String selectedTypeFilter = "All";
+  List<String> petTypeFilter = ["All", "Cat", "Dog", "Rabbit", "Others"];
+
+  // Search variable
+  TextEditingController searchController = TextEditingController();
+
   @override
   void initState() {
-    // Initialize all data variables
-    allPets = [];
-    filteredPets = [];
-    status = "Loading...";
-    formatter = DateFormat('dd/MM/yyyy hh:mm a');
-    selectedTypeFilter = "All";
-    petTypeFilter = ["All", "Cat", "Dog", "Rabbit", "Others"];
-    searchController = TextEditingController();
     super.initState();
 
-    // Check if user is logged in
+    // If user is null or invalid, force logout
     if (widget.user == null ||
         widget.user?.user_id == null ||
         widget.user?.user_id == '0') {
@@ -60,262 +56,10 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
-    // Load pets from API
     loadAllPublicPets();
   }
 
-  @override
-  void dispose() {
-    // Clean up controller
-    searchController.dispose();
-    super.dispose();
-  }
 
-  // ================= LOAD DATA =================
-  // Fetch all pets from API
-  void loadAllPublicPets() {
-    allPets.clear();
-    filteredPets.clear();
-    setState(() {
-      status = "Loading...";
-    });
-
-    http
-        .get(
-          Uri.parse(
-            '${MyConfig.baseUrl}/pawpal/api/get_my_pets.php',
-          ),
-        )
-        .then((response) {
-          print("API Response: ${response.body}");
-
-          if (response.statusCode == 200) {
-            var jsonResponse = jsonDecode(response.body);
-
-            if (jsonResponse['status'] == true &&
-                jsonResponse['data'] != null) {
-              // Parse pets data
-              setState(() {
-                allPets.clear();
-                for (var item in jsonResponse['data']) {
-                  allPets.add(PetService.fromJson(item));
-                }
-                // Initialize filtered list with all pets
-                filteredPets = List.from(allPets);
-                status = allPets.isEmpty ? "No pets available" : "";
-              });
-            } else {
-              // No data returned
-              setState(() {
-                allPets.clear();
-                filteredPets.clear();
-                status = jsonResponse['message'] ?? "No pets found";
-              });
-            }
-          } else {
-            // API request failed
-            setState(() {
-              allPets.clear();
-              filteredPets.clear();
-              status = "Failed to load pets";
-            });
-          }
-        });
-  }
-
-  // ================= FILTER & SEARCH =================
-  // Apply filter and search to pets list
-  void applyFiltersAndSearch() {
-    setState(() {
-      filteredPets = allPets.where((pet) {
-        // Check if pet type matches filter
-        bool typeMatch = selectedTypeFilter == "All" ||
-            pet.petType.toString() == selectedTypeFilter;
-
-        // Check if pet name matches search query
-        bool searchMatch = searchController.text.isEmpty ||
-            pet.petName
-                .toString()
-                .toLowerCase()
-                .contains(searchController.text.toLowerCase());
-
-        return typeMatch && searchMatch;
-      }).toList();
-    });
-  }
-
-  // Execute search query
-  void _performSearch(String query) {
-    Navigator.pop(context);
-
-    if (query.trim().isEmpty) {
-      searchController.clear();
-      applyFiltersAndSearch();
-    } else {
-      searchController.text = query.trim();
-      applyFiltersAndSearch();
-    }
-  }
-
-  // Show search dialog
-  void showSearchDialog() {
-    TextEditingController tempSearchController = TextEditingController();
-
-    showDialog(
-      context: context,
-      barrierDismissible: true,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  "Search Pets",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 12),
-                TextField(
-                  controller: tempSearchController,
-                  autofocus: true,
-                  textInputAction: TextInputAction.search,
-                  onSubmitted: (value) {
-                    _performSearch(value);
-                  },
-                  decoration: InputDecoration(
-                    hintText: "e.g. Kitty, Mochi, Rabitty",
-                    prefixIcon: const Icon(Icons.search),
-                    filled: true,
-                    fillColor: Colors.grey.shade100,
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text("Cancel"),
-                    ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color.fromARGB(255, 72, 38, 44),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                      onPressed: () {
-                        _performSearch(tempSearchController.text);
-                      },
-                      child: const Text("Search"),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  // ================= NAVIGATION & DIALOGS =================
-  // Navigate to pet details screen
-  void navigateToPetDetails(PetService pet) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => PetDetailsScreen(
-          pet: pet,
-          user: widget.user,
-        ),
-      ),
-    );
-  }
-
-  // Show exit confirmation dialog
-  Future<bool> _showExitDialog() async {
-    return await showDialog<bool>(
-          context: context,
-          barrierDismissible: false,
-          builder: (context) => AlertDialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            title: const Text("Exit App"),
-            content: const Text("Are you sure you want to exit PawPal?"),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(false),
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                onPressed: () => Navigator.of(context).pop(true),
-                child: const Text("Exit"),
-              ),
-            ],
-          ),
-        ) ??
-        false;
-  }
-
-  // Logout and clear preferences
-  Future<void> _logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-
-    if (!mounted) return;
-
-    Navigator.pushAndRemoveUntil(
-      context,
-      MaterialPageRoute(builder: (_) => const LoginPage()),
-      (route) => false,
-    );
-  }
-
-  // ================= HELPERS =================
-  // Get first image URL from pet
-  String? getFirstImageUrl(PetService pet) {
-    if (pet.imagePaths == null || pet.imagePaths!.isEmpty) {
-      return null;
-    }
-
-    var images = jsonDecode(pet.imagePaths!) as List;
-    if (images.isNotEmpty) {
-      String firstImage = images[0].toString().trim();
-      return '${MyConfig.baseUrl}/pawpal/$firstImage';
-    }
-
-    return null;
-  }
-
-  // Get color based on pet category
-  Color getCategoryColor(String? category) {
-    switch (category) {
-      case "Adoption":
-        return Colors.green;
-      case "Donation Request":
-        return Colors.orange;
-      case "Help/Rescue":
-        return Colors.red;
-      default:
-        return Colors.blue;
-    }
-  }
-
-  // ================= UI =================
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
@@ -329,13 +73,14 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       child: Scaffold(
         backgroundColor: Colors.grey.shade100,
+        //APP BAR 
         appBar: buildModernAppBar(),
         body: Center(
           child: SizedBox(
             width: contentWidth,
             child: Column(
               children: [
-                // Search bar
+                // SEARCH BAR
                 Padding(
                   padding: const EdgeInsets.all(12.0),
                   child: TextField(
@@ -356,7 +101,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                // Filter dropdown
+
+                // FILTER DROPDOWN
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   child: Row(
@@ -388,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 10),
-                // Pet list
+                // PET LIST
                 Expanded(
                   child: allPets.isEmpty
                       ? _buildEmptyState()
@@ -445,7 +191,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ================= WIDGETS =================
   Widget _buildPetList() {
     return ListView.builder(
       padding: const EdgeInsets.all(10),
@@ -465,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.all(10),
               child: Row(
                 children: [
-                  // Image thumbnail
+                  // IMAGE THUMBNAIL
                   ClipRRect(
                     borderRadius: BorderRadius.circular(12),
                     child: Container(
@@ -491,13 +236,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                     ),
                   ),
+
                   const SizedBox(width: 12),
-                  // Text details
+                  // TEXT DETAILS
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Pet name
+                        // PET NAME
                         Text(
                           filteredPets[index].petName.toString(),
                           style: const TextStyle(
@@ -507,8 +253,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
+
                         const SizedBox(height: 4),
-                        // Pet type
+                        // PET TYPE
                         Text(
                           "Type: ${filteredPets[index].petType.toString()}",
                           style: const TextStyle(
@@ -516,8 +263,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.black87,
                           ),
                         ),
+
                         const SizedBox(height: 4),
-                        // Pet age
+                        // PET AGE
                         Text(
                           "Age: ${filteredPets[index].petAge.toString()}",
                           style: const TextStyle(
@@ -525,8 +273,9 @@ class _HomeScreenState extends State<HomeScreen> {
                             color: Colors.black87,
                           ),
                         ),
+
                         const SizedBox(height: 6),
-                        // Category color label
+                        // CATEGORY COLOR LABEL
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 8,
@@ -551,6 +300,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
                   ),
+
                   const Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
@@ -578,6 +328,134 @@ class _HomeScreenState extends State<HomeScreen> {
             style: TextStyle(fontSize: 18, color: Colors.grey.shade700),
           ),
         ],
+      ),
+    );
+  }
+
+  void loadAllPublicPets() {
+    allPets.clear();
+    filteredPets.clear();
+    setState(() {
+      status = "Loading...";
+    });
+
+    http
+        .get(
+          Uri.parse(
+            '${MyConfig.baseUrl}/pawpal/api/get_my_pets.php',
+          ),
+        )
+        .then((response) {
+          print("API Response: ${response.body}");
+
+          if (response.statusCode == 200) {
+            var jsonResponse = jsonDecode(response.body);
+
+            if (jsonResponse['status'] == true &&
+                jsonResponse['data'] != null) {
+              setState(() {
+                allPets.clear();
+                for (var item in jsonResponse['data']) {
+                  allPets.add(PetService.fromJson(item));
+                }
+                // Apply initial filter
+                filteredPets = List.from(allPets);
+                status = allPets.isEmpty ? "No pets available" : "";
+              });
+            } else {
+              setState(() {
+                allPets.clear();
+                filteredPets.clear();
+                status = jsonResponse['message'] ?? "No pets found";
+              });
+            }
+          } else {
+            setState(() {
+              allPets.clear();
+              filteredPets.clear();
+              status = "Failed to load pets";
+            });
+          }
+        })
+        .catchError((error) {
+          setState(() {
+            allPets.clear();
+            filteredPets.clear();
+            status = "Error: $error";
+          });
+        });
+  }
+
+  // Apply search bar dekat ats 
+  void applyFiltersAndSearch() {
+    setState(() {
+      filteredPets = allPets.where((pet) {
+        // Filter by type
+        bool typeMatch = selectedTypeFilter == "All" ||
+            pet.petType.toString() == selectedTypeFilter;
+
+        // Filter by search query
+        bool searchMatch = searchController.text.isEmpty ||
+            pet.petName
+                .toString()
+                .toLowerCase()
+                .contains(searchController.text.toLowerCase());
+
+        return typeMatch && searchMatch;
+      }).toList();
+    });
+  }
+
+  // Get first image URL
+  String? getFirstImageUrl(PetService pet) {
+    if (pet.imagePaths == null || pet.imagePaths!.isEmpty) {
+      return null;
+    }
+
+    try {
+      var images = jsonDecode(pet.imagePaths!) as List;
+      if (images.isNotEmpty) {
+        String firstImage = images[0].toString().trim();
+        return '${MyConfig.baseUrl}/pawpal/$firstImage';
+      }
+    } catch (e) {
+      try {
+        var paths = pet.imagePaths!.split(',');
+        if (paths.isNotEmpty && paths[0].trim().isNotEmpty) {
+          String firstImage = paths[0].trim();
+          return '${MyConfig.baseUrl}/pawpal/$firstImage';
+        }
+      } catch (e2) {
+        print("Error parsing image paths: $e2");
+      }
+    }
+
+    return null;
+  }
+
+  // Get category color
+  Color getCategoryColor(String? category) {
+    switch (category) {
+      case "Adoption":
+        return Colors.green;
+      case "Donation Request":
+        return Colors.orange;
+      case "Help/Rescue":
+        return Colors.red;
+      default:
+        return Colors.blue;
+    }
+  }
+
+  // Navigate to Pet Details Screen
+  void navigateToPetDetails(PetService pet) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => PetDetailsScreen(
+          pet: pet,
+          user: widget.user,
+        ),
       ),
     );
   }
@@ -620,11 +498,13 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       actions: [
+        // REFRESH ICON
         _buildAppBarIcon(
           icon: Icons.refresh,
           tooltip: "Refresh",
           onTap: () => loadAllPublicPets(),
         ),
+        // MY DONATIONS ICON - Only show if user is logged in
         if (widget.user != null && widget.user?.user_id != '0')
           _buildAppBarIcon(
             icon: Icons.volunteer_activism,
@@ -676,13 +556,143 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha: 0.15),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, size: 20),
           ),
         ),
       ),
+    );
+  }
+
+  void showSearchDialog() {
+    TextEditingController tempSearchController = TextEditingController();
+
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // TITLE
+                const Text(
+                  "Search Pets",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600),
+                ),
+
+                const SizedBox(height: 12),
+
+                // SEARCH FIELD
+                TextField(
+                  controller: tempSearchController,
+                  autofocus: true,
+                  textInputAction: TextInputAction.search,
+                  onSubmitted: (value) {
+                    _performSearch(value);
+                  },
+                  decoration: InputDecoration(
+                    hintText: "e.g. Kitty, Mochi, Rabitty",
+                    prefixIcon: const Icon(Icons.search),
+                    filled: true,
+                    fillColor: Colors.grey.shade100,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                // ACTION BUTTONS
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text("Cancel"),
+                    ),
+                    const SizedBox(width: 8),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color.fromARGB(255, 72, 38, 44),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                      ),
+                      onPressed: () {
+                        _performSearch(tempSearchController.text);
+                      },
+                      child: const Text("Search"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _performSearch(String query) {
+    Navigator.pop(context);
+
+    if (query.trim().isEmpty) {
+      searchController.clear();
+      applyFiltersAndSearch();
+    } else {
+      searchController.text = query.trim();
+      applyFiltersAndSearch();
+    }
+  }
+
+  Future<bool> _showExitDialog() async {
+    return await showDialog<bool>(
+          context: context,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            title: const Text("Exit App"),
+            content: const Text("Are you sure you want to exit PawPal?"),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text("Cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                child: const Text("Exit"),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
+
+  Future<void> _logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // clears user_id, email, rememberMe, etc.
+
+    if (!mounted) return;
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (route) => false,
     );
   }
 }

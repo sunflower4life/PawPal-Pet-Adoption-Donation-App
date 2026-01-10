@@ -17,52 +17,27 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  late TextEditingController nameController;
-  late TextEditingController phoneController;
-  late TextEditingController emailController;
+  final nameController = TextEditingController();
+  final phoneController = TextEditingController();
+  final emailController = TextEditingController();
+
   bool isLoading = false;
   File? profileImage;
   DateFormat dateFormat = DateFormat('dd/MM/yyyy HH:mm a');
 
   @override
   void initState() {
-    nameController = TextEditingController();
-    phoneController = TextEditingController();
-    emailController = TextEditingController();
     super.initState();
     _loadUserData();
   }
 
-  //LOAD DATA
   void _loadUserData() {
     nameController.text = widget.user.name.toString() ?? '';
     phoneController.text = widget.user.phone ?? '';
     emailController.text = widget.user.email ?? '';
   }
 
-  void loadProfile() {
-    http
-        .get(
-          Uri.parse(
-            '${MyConfig.baseUrl}/pawpal/api/get_user_details.php?user_id=${widget.user.user_id}',
-          ),
-        )
-        .then((response) {
-          if (response.statusCode == 200) {
-            var jsonResponse = response.body;
-            var resarray = jsonDecode(jsonResponse);
-            log(response.body);
-            if (resarray['status'] == true) {
-              User user = User.fromJson(resarray['data'][0]);
-              widget.user = user;
-              _loadUserData();
-              setState(() {});
-            }
-          }
-        });
-  }
-
-  //IMAGE PICKER 
+  //PICK PROFILE IMAGE FROM GALLERY 
   Future<void> _pickProfileImage() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
@@ -74,7 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  //UPDATE PROFILE 
+  //UPDATE PROFILE
   Future<void> _updateProfile() async {
     if (nameController.text.isEmpty || phoneController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -131,7 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
     setState(() => isLoading = false);
   }
 
-  // UI
+  //UI
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width > 500
@@ -164,7 +139,7 @@ class _ProfilePageState extends State<ProfilePage> {
               loadProfile();
             },
           ),
-        ],
+        ]
       ),
       body: Stack(
         children: [
@@ -182,7 +157,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     padding: const EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        // Profile image avatar
+                        //PROFILE IMAGE AVATAR
                         GestureDetector(
                           onTap: _pickProfileImage,
                           child: CircleAvatar(
@@ -210,7 +185,11 @@ class _ProfilePageState extends State<ProfilePage> {
                                 : null,
                           ),
                         ),
+
+
                         const SizedBox(height: 12),
+
+                        // Tap to change photo text
                         Text(
                           "Tap to change photo",
                           style: TextStyle(
@@ -219,8 +198,10 @@ class _ProfilePageState extends State<ProfilePage> {
                             fontStyle: FontStyle.italic,
                           ),
                         ),
+
                         const SizedBox(height: 20),
-                        // Readonly fields
+
+                        //READONLY FIELDS 
                         _readonlyField("User ID", widget.user.user_id),
                         _readonlyField("Email", widget.user.email),
                         _readonlyField(
@@ -231,30 +212,36 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ),
                         ),
+
                         const Divider(height: 30),
                         const SizedBox(height: 8),
-                        // Editable fields
+
+                        //EDITABLE FIELDS
                         _inputField(
                           controller: nameController,
                           label: "Name",
                           icon: Icons.person,
                           keyboard: TextInputType.name,
                         ),
+
                         const SizedBox(height: 12),
+
                         _inputField(
                           controller: phoneController,
                           label: "Phone Number",
                           icon: Icons.phone_outlined,
                           keyboard: TextInputType.phone,
                         ),
+
                         const SizedBox(height: 20),
-                        // Save button
+
+                        //SAVE BUTTON 
                         SizedBox(
                           width: double.infinity,
                           height: 50,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              padding: EdgeInsets.zero,
+                              padding: EdgeInsets.zero, // IMPORTANT
                               backgroundColor: Colors.transparent,
                               shadowColor: Colors.transparent,
                               shape: RoundedRectangleBorder(
@@ -266,9 +253,9 @@ class _ProfilePageState extends State<ProfilePage> {
                               decoration: BoxDecoration(
                                 gradient: const LinearGradient(
                                   colors: [
-                                    Color.fromARGB(255, 72, 38, 44),
-                                    Color.fromARGB(255, 120, 60, 70),
-                                    Color.fromARGB(255, 200, 150, 160),
+                                    const Color.fromARGB(255, 72, 38, 44),
+                                    const Color.fromARGB(255, 120, 60, 70),
+                                    const Color.fromARGB(255, 200, 150, 160),
                                   ],
                                   begin: Alignment.centerLeft,
                                   end: Alignment.centerRight,
@@ -296,7 +283,8 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
-          // Loading overlay
+
+          // LOADING OVERLAY 
           if (isLoading)
             Container(
               color: Colors.black.withOpacity(0.3),
@@ -307,7 +295,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  //  HELPER WIDGETS
+  //  HELPER WIDGETS 
   Widget _readonlyField(String label, String? value) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
@@ -338,5 +326,27 @@ class _ProfilePageState extends State<ProfilePage> {
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
       ),
     );
+  }
+
+  void loadProfile() {
+    http
+        .get(
+          Uri.parse(
+            '${MyConfig.baseUrl}/pawpal/api/get_user_details.php?user_id=${widget.user.user_id}',
+          ),
+        )
+        .then((response) {
+          if (response.statusCode == 200) {
+            var jsonResponse = response.body;
+            var resarray = jsonDecode(jsonResponse);
+            log(response.body);
+            if (resarray['status'] == true) {
+              User user = User.fromJson(resarray['data'][0]);
+              widget.user = user;
+              _loadUserData();
+              setState(() {});
+            }
+          }
+        });
   }
 }
