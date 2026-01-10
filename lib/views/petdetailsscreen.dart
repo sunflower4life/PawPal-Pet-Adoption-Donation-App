@@ -608,6 +608,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
   }
 
   void submitAdoptionRequest() {
+    // Check if user is logged in
     if (widget.user == null || widget.user?.user_id == null || widget.user?.user_id == '0') {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please login first"), backgroundColor: Colors.red),
@@ -615,6 +616,7 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
       return;
     }
 
+    // Validate motivation message
     if (motivationController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please enter motivation message"), backgroundColor: Colors.red),
@@ -629,19 +631,23 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
       return;
     }
 
+    // Show confirmation dialog
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text("Submit Adoption Request"),
-        content: const Text("Are you sure?"),
+        content: const Text("Are you sure you want to submit this adoption request?"),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
             onPressed: () {
-              Navigator.pop(context);
-              submitAdoptionToAPI();
+              Navigator.pop(context); // Close dialog
+              submitAdoptionToAPI(); // Submit to API
             },
             child: const Text("Submit", style: TextStyle(color: Colors.white)),
           ),
@@ -673,26 +679,56 @@ class _PetDetailsScreenState extends State<PetDetailsScreen> {
         var res = jsonDecode(response.body);
 
         if (res['status'] == true) {
+          // Success! Show success message
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Request submitted successfully!"), backgroundColor: Colors.green),
+            const SnackBar(
+              content: Text("Adoption request submitted successfully! ✓"),
+              backgroundColor: Colors.green,
+              duration: Duration(seconds: 3),
+            ),
           );
+          
+          // Clear the form
           motivationController.clear();
-          Future.delayed(const Duration(seconds: 1), () {
-            Navigator.pop(context);
+          
+          // Wait 2 seconds then navigate back to home
+          Future.delayed(const Duration(seconds: 2), () {
+            if (mounted) {
+              Navigator.pop(context); // Go back to pet listing
+            }
           });
         } else {
+          // API returned error
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(res['message'] ?? "Failed"), backgroundColor: Colors.red),
+            SnackBar(
+              content: Text(res['message'] ?? "Failed to submit adoption request"),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 3),
+            ),
           );
         }
+      } else {
+        // HTTP error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Server error: ${response.statusCode}"),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     }).catchError((error) {
       setState(() {
         isSubmittingRequest = false;
       });
 
+      print("Error submitting adoption request: $error");
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $error"), backgroundColor: Colors.red),
+        SnackBar(
+          content: Text("Error: $error"),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 3),
+        ),
       );
     });
   }
